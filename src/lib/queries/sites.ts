@@ -19,6 +19,7 @@ export async function getSiteDetail(id: string) {
     include: {
       clientAccount: true,
       subcontractor: true,
+      _count: { select: { employees: true, tenders: true, invoices: true, assets: true, billingContracts: true } },
       billingContracts: { include: { client: true, subcontractor: true, lineTemplates: { orderBy: { sortOrder: "asc" } } } },
       photos: { orderBy: { createdAt: "desc" } },
       engineers: { include: { user: { select: { id: true, name: true, role: true, avatarUrl: true } } } },
@@ -40,8 +41,8 @@ export async function getSiteDetail(id: string) {
 
   if (!site) return null;
 
-  // Prisma's Decimal is a class instance and cannot cross the Server →
-  // Client Component boundary — convert every Decimal field to a plain
+  // Prisma's Decimal is a class instance and cannot cross the Server â†’
+  // Client Component boundary â€” convert every Decimal field to a plain
   // number here, once, so every panel downstream just deals with numbers.
   const documents = await resolveStoredFileUrls(site.documents);
 
