@@ -1,0 +1,40 @@
+RATNESWAR ENGINEERING ERP — CLOUD V8
+===================================
+
+FINAL ARCHITECTURE
+------------------
+1) App hosting: Netlify cloud (Next.js)
+2) Database/Auth/Files: Supabase cloud
+3) AI: Cloudflare Workers AI cloud
+4) Owner/Admin use only a browser/mobile browser.
+5) No office PC server, Ollama worker, localhost ERP, or local data store is required.
+
+SHARED DATA RULE
+----------------
+Owner and Admin read/write the SAME Supabase database. A save by either user is stored centrally.
+Open dashboards auto-refresh from cloud data every ~12 seconds and whenever the tab regains focus.
+
+LOGIN
+-----
+Supabase email + password authentication.
+Only app users with role OWNER or ADMIN and isActive=true are allowed into the dashboard.
+Forgot-password/reset-password pages are included.
+There is no public sign-up screen. New users are created from Users inside the ERP.
+
+DEPLOYMENT — NO LOCAL RUNTIME
+-----------------------------
+A) Put this source code in a GitHub repository.
+B) In Netlify: Add new project -> Import from Git -> choose the repository.
+C) Add every value from .env.cloud.example under Netlify -> Project configuration -> Environment variables.
+D) Deploy. Netlify runs database migrations and production build in its cloud build environment.
+E) In Supabase Auth -> URL Configuration, set Site URL to the Netlify production URL and add the reset/callback URLs.
+F) After first deploy, set NEXT_PUBLIC_APP_URL to the final Netlify URL and redeploy.
+
+CLOUDFLARE AI
+-------------
+Create a Cloudflare API token that can run Workers AI for your account. Put only the token/account ID in Netlify environment variables.
+The browser never receives this secret.
+
+IMPORTANT
+---------
+Do NOT run the old V7 local setup or Ollama scripts for this cloud version.

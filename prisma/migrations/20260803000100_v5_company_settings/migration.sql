@@ -1,0 +1,18 @@
+ALTER TABLE "company_settings"
+  ADD COLUMN IF NOT EXISTS "tradeName" TEXT NOT NULL DEFAULT 'Ratneswar Engineering',
+  ADD COLUMN IF NOT EXISTS "tagline" TEXT NOT NULL DEFAULT 'Electrical, Mechanical, Civil & Solar Contractor',
+  ADD COLUMN IF NOT EXISTS "pan" TEXT,
+  ADD COLUMN IF NOT EXISTS "city" TEXT NOT NULL DEFAULT 'Rapar',
+  ADD COLUMN IF NOT EXISTS "state" TEXT NOT NULL DEFAULT 'Gujarat',
+  ADD COLUMN IF NOT EXISTS "stateCode" TEXT NOT NULL DEFAULT '24',
+  ADD COLUMN IF NOT EXISTS "pincode" TEXT,
+  ADD COLUMN IF NOT EXISTS "website" TEXT,
+  ADD COLUMN IF NOT EXISTS "logoUrl" TEXT,
+  ADD COLUMN IF NOT EXISTS "jurisdiction" TEXT NOT NULL DEFAULT 'Gujarat',
+  ADD COLUMN IF NOT EXISTS "declaration" TEXT NOT NULL DEFAULT 'We declare that this document shows the actual price of the goods/services described and that all particulars are true and correct.',
+  ADD COLUMN IF NOT EXISTS "defaultPaymentTerms" TEXT NOT NULL DEFAULT 'Within 30 Days',
+  ADD COLUMN IF NOT EXISTS "defaultQuoteTerms" TEXT NOT NULL DEFAULT 'Prices are valid for 30 days. Work will be executed as per mutually approved scope and schedule.',
+  ADD COLUMN IF NOT EXISTS "defaultPoTerms" TEXT NOT NULL DEFAULT 'Material must conform to approved specifications. Delivery and payment shall be as stated in this purchase order.',
+  ADD COLUMN IF NOT EXISTS "aiProvider" TEXT NOT NULL DEFAULT 'OLLAMA',
+  ADD COLUMN IF NOT EXISTS "ollamaBaseUrl" TEXT NOT NULL DEFAULT 'http://127.0.0.1:11434',
+  ADD COLUMN IF NOT EXISTS "ollamaModel" TEXT NOT NULL DEFAULT 'llama3.2:3b';

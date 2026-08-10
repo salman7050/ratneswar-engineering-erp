@@ -1,0 +1,52 @@
+import {
+  LayoutDashboard,
+  MapPinned,
+  FileSignature,
+  FolderOpen,
+  Wallet,
+  Users,
+  Receipt,
+  ShieldCheck,
+  Settings,
+  FileText,
+  ShoppingCart,
+  ClipboardList,
+  Boxes,
+  BarChart3,
+  Command,
+  CalendarClock,
+  Building2,
+  BadgeIndianRupee,
+  WalletCards,
+  FileSpreadsheet,
+  Landmark,
+  type LucideIcon,
+} from "lucide-react";
+
+export const ICON_MAP: Record<string, LucideIcon> = {
+  LayoutDashboard,
+  MapPinned,
+  FileSignature,
+  FolderOpen,
+  Wallet,
+  Users,
+  Receipt,
+  ShieldCheck,
+  Settings,
+  FileText,
+  ShoppingCart,
+  ClipboardList,
+  Boxes,
+  BarChart3,
+  Command,
+  CalendarClock,
+  Building2,
+  BadgeIndianRupee,
+  WalletCards,
+  FileSpreadsheet,
+  Landmark,
+};
+
+export function resolveIcon(name: string): LucideIcon {
+  return ICON_MAP[name] ?? LayoutDashboard;
+}

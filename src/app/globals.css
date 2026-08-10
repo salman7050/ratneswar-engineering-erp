@@ -1,0 +1,394 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Professional light workspace — default for shared team use */
+    --background: 220 25% 97%;
+    --foreground: 222 47% 9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 9%;
+
+    --primary: 222 47% 9%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 220 20% 93%;
+    --secondary-foreground: 222 47% 9%;
+
+    --muted: 220 20% 93%;
+    --muted-foreground: 215 16% 42%;
+
+    --accent: 38 52% 52%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 210 40% 98%;
+
+    --success: 152 60% 34%;
+    --success-foreground: 210 40% 98%;
+
+    --warning: 38 92% 46%;
+    --warning-foreground: 222 47% 9%;
+
+    --info: 210 90% 48%;
+    --info-foreground: 210 40% 98%;
+
+    --border: 220 20% 88%;
+    --input: 220 20% 88%;
+    --ring: 222 47% 9%;
+
+    --radius: 0.9rem;
+
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 222 47% 9%;
+    --sidebar-border: 220 20% 90%;
+    --sidebar-accent: 220 20% 94%;
+    --sidebar-accent-foreground: 222 47% 9%;
+
+    --glass-bg: rgba(255, 255, 255, 0.55);
+    --glass-border: rgba(15, 23, 42, 0.08);
+    --glass-highlight: rgba(255, 255, 255, 0.6);
+  }
+
+  .dark {
+    /* ── Dark Luxury — deep charcoal-navy, glass surfaces, gold accent ── */
+    --background: 224 42% 5%;
+    --foreground: 210 25% 95%;
+
+    --card: 222 36% 9%;
+    --card-foreground: 210 25% 95%;
+
+    --popover: 224 38% 7%;
+    --popover-foreground: 210 25% 95%;
+
+    --primary: 210 20% 97%;
+    --primary-foreground: 224 44% 7%;
+
+    --secondary: 222 30% 14%;
+    --secondary-foreground: 210 25% 95%;
+
+    --muted: 222 28% 13%;
+    --muted-foreground: 215 15% 62%;
+
+    --accent: 38 58% 62%;
+    --accent-foreground: 224 44% 8%;
+
+    --destructive: 0 72% 60%;
+    --destructive-foreground: 210 20% 97%;
+
+    --success: 152 55% 50%;
+    --success-foreground: 224 44% 7%;
+
+    --warning: 38 92% 58%;
+    --warning-foreground: 224 44% 7%;
+
+    --info: 210 90% 64%;
+    --info-foreground: 224 44% 7%;
+
+    --border: 222 24% 17%;
+    --input: 222 24% 17%;
+    --ring: 38 58% 62%;
+
+    --sidebar-background: 224 46% 4%;
+    --sidebar-foreground: 210 22% 88%;
+    --sidebar-border: 222 28% 13%;
+    --sidebar-accent: 222 32% 11%;
+    --sidebar-accent-foreground: 210 25% 95%;
+
+    --glass-bg: rgba(255, 255, 255, 0.045);
+    --glass-border: rgba(255, 255, 255, 0.09);
+    --glass-highlight: rgba(255, 255, 255, 0.07);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    color-scheme: light;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    background-image:
+      radial-gradient(circle at 12% 8%, hsl(var(--accent) / 0.06), transparent 38%),
+      radial-gradient(circle at 88% 92%, hsl(var(--info) / 0.05), transparent 42%);
+    background-attachment: fixed;
+  }
+  ::selection {
+    background: hsl(var(--accent) / 0.35);
+    color: hsl(var(--foreground));
+  }
+  :focus-visible {
+    outline: 2px solid hsl(var(--ring) / 0.6);
+    outline-offset: 2px;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply tracking-tight;
+  }
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* ═══════════════════ Glassmorphism & Soft-3D system ═══════════════════ */
+
+@layer components {
+  .glass {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+  }
+
+  .glass-card {
+    @apply glass rounded-2xl shadow-3d transition-all duration-300 ease-out;
+  }
+  .glass-card-hover {
+    @apply glass-card hover:-translate-y-[3px] hover:shadow-3d-hover hover:border-white/[0.14];
+  }
+
+  /* Soft 3D card: subtle inner top highlight + deep drop shadow, like a
+     lightly embossed premium surface (Apple Card / Tesla app tile feel) */
+  .card-3d {
+    @apply relative rounded-2xl border border-border bg-card shadow-3d transition-all duration-300 ease-out;
+  }
+  .card-3d::before {
+    content: "";
+    @apply pointer-events-none absolute inset-0 rounded-2xl opacity-[0.5];
+    background: linear-gradient(180deg, hsl(var(--foreground) / 0.05), transparent 40%);
+  }
+  .card-3d-hover {
+    @apply card-3d hover:-translate-y-[3px] hover:shadow-3d-hover;
+  }
+
+  .text-gradient-gold {
+    background: linear-gradient(135deg, #f0d9a8 0%, #c6a15b 55%, #a9803e 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .text-gradient-white {
+    background: linear-gradient(180deg, #ffffff 0%, rgba(255, 255, 255, 0.68) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .noise-overlay {
+    @apply pointer-events-none absolute inset-0 opacity-[0.03];
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+}
+
+/* ═══════════════════ Scrollbars, loading, misc utilities ═══════════════════ */
+
+@layer utilities {
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: hsl(var(--foreground) / 0.14);
+    border-radius: 999px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--foreground) / 0.22);
+  }
+
+  .skeleton {
+    @apply relative overflow-hidden bg-muted;
+  }
+  .skeleton::after {
+    content: "";
+    @apply absolute inset-0 -translate-x-full animate-shimmer;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      hsl(var(--foreground) / 0.06),
+      transparent
+    );
+  }
+
+  .hover-lift {
+    @apply transition-transform duration-300 ease-out hover:-translate-y-[2px];
+  }
+  .press-scale {
+    @apply transition-transform duration-150 ease-out active:scale-[0.97];
+  }
+}
+
+/* Respect the user's OS-level motion preference — disables framer-motion/
+   CSS animations and transitions site-wide instead of leaving them running
+   for people who've asked their system to reduce motion. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@layer utilities {
+  /* Comfortable min touch target on phones/tablets (WCAG 2.5.5 / iOS HIG). */
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
+  /* Padding that respects notches/home-indicator when installed as a PWA. */
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #print-doc, #print-doc * {
+    visibility: visible;
+  }
+  #print-doc {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    max-width: 100%;
+    box-shadow: none !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+}
+
+/* ═════════════ Ratneswar official A4 documents ═════════════ */
+.official-invoice-wrap,.official-quote-wrap{display:flex;flex-direction:column;gap:24px;align-items:center;width:100%;font-family:Arial,Helvetica,sans-serif;color:#111}
+.official-invoice-page,.official-quote-page{position:relative;width:210mm;min-height:297mm;background:#fff;padding:10mm 11mm 13mm;box-shadow:0 14px 42px rgba(15,23,42,.14);font-size:9.5px;line-height:1.3}
+.invoice-document-header{height:23mm;position:relative;display:flex;justify-content:center;align-items:flex-start;padding-top:2mm}.invoice-title{font-size:16px;font-weight:800}.invoice-copy{position:absolute;left:50%;top:7mm;transform:translateX(-50%);font-size:9px;font-style:italic}.invoice-wordmark{position:absolute;right:0;top:0;width:48mm;max-height:19mm;object-fit:contain}
+.invoice-party-meta-grid{display:grid;grid-template-columns:1fr 1fr;border:1px solid #111}.invoice-parties{border-right:1px solid #111}.invoice-seller,.invoice-buyer{padding:2.5mm;min-height:31mm}.invoice-seller{border-bottom:1px solid #111}.invoice-company-name{font-size:10.5px;font-weight:800}.invoice-small-label,.invoice-meta-label{font-size:7.8px;color:#333}.invoice-meta-grid{display:grid;grid-template-columns:1fr 1fr}.invoice-meta-cell{padding:1.5mm 2mm;min-height:11mm;border-right:1px solid #111;border-bottom:1px solid #111}.invoice-meta-cell:nth-child(2n){border-right:0}.invoice-meta-value{font-weight:700;margin-top:.5mm}.invoice-meta-wide{grid-column:1/-1;padding:1.5mm 2mm;min-height:16mm}.invoice-items-table,.invoice-page2-table,.invoice-tax-summary{width:100%;border-collapse:collapse}.invoice-items-table{min-height:145mm}.invoice-items-table th,.invoice-items-table td,.invoice-page2-table th,.invoice-page2-table td,.invoice-tax-summary th,.invoice-tax-summary td{border:1px solid #111;padding:1.4mm}.invoice-items-table th,.invoice-page2-table th,.invoice-tax-summary th{font-weight:700;text-align:center;background:#fafafa}.invoice-items-table td{vertical-align:top}.invoice-item-category{font-size:7px;font-weight:700;text-transform:uppercase;color:#555;margin-bottom:1mm}.w-sl{width:8mm}.w-testing{width:40mm}.w-hsn{width:18mm}.w-qty{width:21mm}.w-rate{width:23mm}.w-amount{width:27mm}.center{text-align:center}.right{text-align:right}.bold{font-weight:700}.invoice-fill-row{height:65mm}.tax-line td{vertical-align:middle}.invoice-page-continuation{text-align:right;font-size:8px;margin-top:-4mm}.invoice-page-footer{position:absolute;bottom:5mm;left:11mm;right:11mm;text-align:center;font-size:8px}.invoice-page2-summary{display:grid;grid-template-columns:1fr 1fr;border:1px solid #111;margin-bottom:0}.invoice-page2-summary>div{padding:2.5mm}.invoice-page2-summary>div:first-child{border-right:1px solid #111}.invoice-page2-meta{display:grid;grid-template-columns:1fr 1fr;padding:0!important}.invoice-page2-table{height:135mm}.invoice-page2-space{height:105mm}.invoice-words{border:1px solid #111;border-top:0;padding:2mm;display:flex;flex-direction:column}.invoice-tax-summary{margin-top:0}.invoice-tax-words{border:1px solid #111;border-top:0;padding:2mm}.invoice-bottom-grid{display:grid;grid-template-columns:1.3fr 1.15fr 1fr;border:1px solid #111;border-top:0}.invoice-bottom-grid>div{padding:2.5mm;border-right:1px solid #111;min-height:42mm}.invoice-bottom-grid>div:last-child{border-right:0}.invoice-signatory{text-align:center}.invoice-signatory img{height:24mm;max-width:43mm;object-fit:contain}.invoice-remarks{border:1px solid #111;border-top:0;padding:2mm}
+.quote-letterhead{height:26mm;display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #07579d;color:#07579d}.quote-letterhead img{width:54mm;max-height:20mm;object-fit:contain}.quote-gstin{font-size:13px;font-weight:800}.quote-contractor{font-size:8px;font-weight:700;margin-top:3mm}.quote-number-row{display:flex;justify-content:space-between;margin-top:5mm;font-family:Georgia,serif;font-size:10px}.quote-heading{font:800 18px Georgia,serif;margin:7mm 0 4mm;text-decoration:underline}.quote-party-block{display:grid;grid-template-columns:1fr 1fr;gap:9mm;font-family:Georgia,serif}.quote-party-block>div{display:flex;flex-direction:column;gap:1mm}.quote-party-block strong{font-size:12px}.quote-subject{border-top:1px solid #888;border-bottom:1px solid #888;padding:4mm 0;margin-top:5mm;font:10px Georgia,serif}.quote-section-heading{font:800 12px Georgia,serif;margin:6mm 0 2mm}.quote-table{width:100%;border-collapse:collapse;font:9px Georgia,serif}.quote-table th,.quote-table td{border:1px solid #222;padding:2.5mm}.quote-table th{text-align:center}.quote-table th:first-child{width:10mm}.quote-table th:nth-child(3){width:20mm}.quote-table th:nth-child(4){width:18mm}.quote-table th:nth-child(5),.quote-table th:nth-child(6){width:27mm}.quote-summary{width:86mm;margin-left:auto;margin-top:3mm;border:1px solid #222}.quote-summary>div{display:flex;justify-content:space-between;padding:1.8mm 2.5mm;border-bottom:1px solid #aaa}.quote-summary>div:last-child{border-bottom:0}.quote-summary .grand{font-size:11px;background:#eef6ff}.quote-words,.quote-validity{font:9px Georgia,serif;margin-top:3mm}.quote-footer{position:absolute;left:8mm;right:8mm;bottom:5mm;border-top:2px solid #07579d;padding-top:2mm;text-align:center;color:#07579d;font-size:8px;font-weight:700}.quote-page-two{font-family:Georgia,serif}.quote-terms-grid{display:grid;grid-template-columns:1fr 1fr;border:1px solid #333}.quote-terms-grid>div{padding:4mm;border-right:1px solid #aaa;border-bottom:1px solid #aaa;min-height:28mm}.quote-terms-grid>div:nth-child(2n){border-right:0}.quote-terms-grid p{margin-top:2mm}.quote-bank-box{display:grid;grid-template-columns:1fr 1fr;border:1px solid #333}.quote-bank-box>div{padding:3mm;display:flex;flex-direction:column;border-right:1px solid #aaa;border-bottom:1px solid #aaa}.quote-bank-box>div:nth-child(2n){border-right:0}.quote-declaration{margin-top:10mm;border:1px solid #333;padding:4mm}.quote-signature{margin:12mm 0 0 auto;width:60mm;text-align:center}.quote-signature img{height:32mm;max-width:50mm;object-fit:contain}
+@media(max-width:900px){.official-invoice-page,.official-quote-page{transform-origin:top left;box-shadow:none}.official-invoice-wrap,.official-quote-wrap{align-items:flex-start;overflow:auto}}
+@media print{@page{size:A4;margin:0}.official-invoice-wrap,.official-quote-wrap{display:block}.official-invoice-page,.official-quote-page{width:210mm;height:297mm;min-height:297mm;padding:10mm 11mm 13mm;box-shadow:none;page-break-after:always;break-after:page}.official-invoice-page:last-child,.official-quote-page:last-child{page-break-after:auto;break-after:auto}body{background:#fff!important}}
+
+
+/* ═════════════ Print-safe A4 overrides (V4) ═════════════ */
+.official-generic-wrap{
+  position:relative;
+  box-sizing:border-box;
+  width:210mm;
+  min-height:297mm;
+  margin:0 auto;
+  padding:10mm 11mm 14mm;
+  background:#fff;
+  box-shadow:0 14px 42px rgba(15,23,42,.14);
+  overflow:hidden;
+  font-family:Arial,Helvetica,sans-serif;
+}
+.official-generic-wrap table{width:100%;border-collapse:collapse;table-layout:fixed}
+.official-generic-wrap thead{display:table-header-group}
+.official-generic-wrap tr,.official-generic-wrap td,.official-generic-wrap th{break-inside:avoid;page-break-inside:avoid}
+.official-generic-wrap img{max-width:100%}
+.official-invoice-page,.official-quote-page,.official-generic-wrap{
+  box-sizing:border-box;
+  print-color-adjust:exact;
+  -webkit-print-color-adjust:exact;
+}
+.official-invoice-page,.official-quote-page{overflow:hidden}
+.invoice-items-table thead,.invoice-page2-table thead,.invoice-tax-summary thead,.quote-table thead{display:table-header-group}
+.invoice-items-table tr,.invoice-page2-table tr,.invoice-tax-summary tr,.quote-table tr{break-inside:avoid;page-break-inside:avoid}
+.invoice-document-header,.quote-letterhead,.invoice-party-meta-grid,.invoice-page2-summary,.invoice-bottom-grid,.quote-summary,.quote-bank-box,.quote-declaration,.quote-signature{break-inside:avoid;page-break-inside:avoid}
+
+@media screen and (max-width:900px){
+  .official-generic-wrap{transform-origin:top left;box-shadow:none}
+}
+
+@media print{
+  html,body{width:210mm!important;min-height:297mm!important;margin:0!important;padding:0!important;background:#fff!important}
+  body{overflow:visible!important}
+  #print-doc{position:static!important;left:auto!important;top:auto!important;width:auto!important;max-width:none!important;margin:0!important}
+  .official-invoice-wrap,.official-quote-wrap{display:block!important;width:210mm!important;margin:0!important;padding:0!important;gap:0!important}
+  .official-invoice-page,.official-quote-page,.official-generic-wrap{
+    width:210mm!important;
+    height:297mm!important;
+    min-height:297mm!important;
+    max-height:297mm!important;
+    margin:0!important;
+    padding:10mm 11mm 13mm!important;
+    box-shadow:none!important;
+    border:0!important;
+    overflow:hidden!important;
+  }
+  .official-generic-wrap{page-break-after:auto!important;break-after:auto!important}
+  .official-invoice-page,.official-quote-page{page-break-after:always!important;break-after:page!important}
+  .official-invoice-page:last-child,.official-quote-page:last-child{page-break-after:auto!important;break-after:auto!important}
+  a[href]:after{content:none!important}
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   V6 Ratneswar letterhead quotation — A4-first print layout
+   Based on the company's approved quotation letterhead style.
+   ═══════════════════════════════════════════════════════════════ */
+.ratneswar-quotation-wrap{display:flex;flex-direction:column;align-items:center;gap:22px;width:100%;color:#111;font-family:"Times New Roman",Times,serif}
+.ratneswar-quotation-page{position:relative;box-sizing:border-box;width:210mm;height:297mm;overflow:hidden;background:#fff;padding:9mm 7mm 18mm;box-shadow:0 14px 42px rgba(15,23,42,.14);font-size:10.4px;line-height:1.25}
+.rq-letterhead{position:relative;z-index:2;height:23mm;display:flex;align-items:flex-start;justify-content:space-between;border-bottom:1.2mm solid #07549b;padding:0 1mm 2.2mm}
+.rq-company-meta{color:#07549b;font-family:Arial,Helvetica,sans-serif;font-weight:800}.rq-company-meta>div:first-child{font-size:13px;letter-spacing:.2px}.rq-company-meta>div:last-child{margin-top:3mm;font-size:9px;letter-spacing:.1px}
+.rq-wordmark{width:58mm;height:19mm;object-fit:contain;object-position:right top}
+.rq-ref-row{position:relative;z-index:2;display:flex;justify-content:space-between;margin:4mm 1.5mm 3mm;font-size:10px}.rq-continuation{margin-bottom:5mm}
+.rq-to-block{position:relative;z-index:2;display:flex;flex-direction:column;margin:0 2mm 4mm;line-height:1.45}.rq-to-block b{font-weight:700}.rq-to-block span{white-space:pre-line}
+.rq-subject{position:relative;z-index:2;margin:3mm 2mm 4mm;font-weight:700;line-height:1.35}.rq-intro{position:relative;z-index:2;margin:0 2mm 2.5mm}.rq-intro b{display:block;margin-bottom:1.5mm}.rq-intro p{margin:0;text-align:justify;font-weight:600;line-height:1.38}
+.rq-table{position:relative;z-index:2;width:100%;border-collapse:collapse;table-layout:fixed;margin-top:1.5mm;font-size:9.3px}.rq-table th,.rq-table td{border:.35mm solid #222;padding:1.8mm 1.4mm;vertical-align:top}.rq-table th{font-weight:700;text-align:left;background:rgba(255,255,255,.78)}.rq-table th:first-child,.rq-table td:first-child{width:11mm;text-align:center}.rq-table th:nth-last-child(1),.rq-table td:nth-last-child(1){width:25mm}.rq-table th:nth-last-child(2),.rq-table td:nth-last-child(2){width:21mm}.rq-table td:nth-last-child(1){text-align:right}.rq-table td:nth-last-child(2){text-align:right}
+.rq-final-block{position:relative;z-index:2;margin:4mm 2mm 0}.rq-totals{width:78mm;margin-left:0;font-weight:700}.rq-totals>div{display:flex;justify-content:space-between;gap:4mm;margin-bottom:.7mm}.rq-totals .rq-words{display:block;margin-top:1.4mm;font-style:italic;line-height:1.35}.rq-grand{font-size:10.5px}.rq-list{margin-top:5mm;max-width:170mm}.rq-list>b{display:block;margin-bottom:1.5mm}.rq-list ol{margin:0;padding-left:7mm}.rq-list li{margin:0 0 1.2mm;font-weight:600;line-height:1.32}.rq-closing{margin-top:5mm;font-weight:600;line-height:1.38}.rq-closing p{margin:0 0 1mm}.rq-thanks{margin-top:2.5mm!important}.rq-signature{position:absolute;left:4mm;bottom:24mm;width:48mm;text-align:left;font-size:9px}.rq-signature img{display:block;height:24mm;max-width:43mm;object-fit:contain;object-position:left bottom}.rq-approval-line{position:absolute;right:3mm;bottom:26mm;color:#475569;font-family:Arial,Helvetica,sans-serif;font-size:7.5px}
+.rq-footer{position:absolute;z-index:3;left:7mm;right:7mm;bottom:5mm;border-top:1.1mm solid #07549b;padding-top:2mm;text-align:center;color:#07549b;font-family:Arial,Helvetica,sans-serif;font-size:8.3px;font-weight:700;line-height:1.4}
+.rq-watermark{pointer-events:none;position:absolute;z-index:0;left:28mm;top:78mm;width:150mm;height:150mm;opacity:.09}.rq-watermark img{width:100%;height:100%;object-fit:contain}.rq-draft-watermark{pointer-events:none;position:absolute;z-index:4;left:18mm;right:18mm;top:142mm;transform:rotate(-24deg);border:2px solid rgba(194,65,12,.28);color:rgba(194,65,12,.25);font-family:Arial,Helvetica,sans-serif;font-size:25px;font-weight:900;letter-spacing:2px;text-align:center;padding:3mm}
+
+@media(max-width:900px){.ratneswar-quotation-wrap{align-items:flex-start;overflow:auto}.ratneswar-quotation-page{box-shadow:none}}
+@media print{
+  @page{size:A4 portrait;margin:0}
+  .ratneswar-quotation-wrap{display:block!important;width:210mm!important;margin:0!important;padding:0!important;gap:0!important}
+  .ratneswar-quotation-page{width:210mm!important;height:297mm!important;min-height:297mm!important;margin:0!important;padding:9mm 7mm 18mm!important;box-shadow:none!important;page-break-after:always!important;break-after:page!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  .ratneswar-quotation-page:last-child{page-break-after:auto!important;break-after:auto!important}
+  .rq-table thead{display:table-header-group}.rq-table tr{break-inside:avoid;page-break-inside:avoid}
+  body{background:#fff!important}
+}
+
+/* ═════════════ Final V7 Purchase Order — clean A4 letterpad ═════════════ */
+.ratneswar-po-wrap{display:flex;justify-content:center;width:100%;font-family:Arial,Helvetica,sans-serif;color:#16191f}
+.ratneswar-po-page{box-sizing:border-box;width:210mm;min-height:297mm;background:#fff;padding:7mm 7.5mm 6mm;box-shadow:0 14px 42px rgba(15,23,42,.13);font-size:9.2px;line-height:1.38;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+.rpo-letterhead{display:grid;grid-template-columns:1.08fr .92fr;gap:8mm;min-height:34mm;border-bottom:.7mm solid #0d4e8a;padding:0 2mm 3mm}.rpo-brand{display:flex;flex-direction:column;justify-content:flex-start}.rpo-wordmark{width:78mm;height:21mm;object-fit:contain;object-position:left top}.rpo-brand p{margin:1.5mm 0 0 3mm;font-size:7.4px;font-weight:700;letter-spacing:.35px;color:#172554}.rpo-company-contact{border-left:.25mm solid #94a3b8;padding-left:6mm;font-size:8.3px;line-height:1.55;color:#263142}.rpo-company-contact p{margin:0 0 .7mm}.rpo-title{margin:4mm 0 3.5mm;text-align:center;font-size:17px;line-height:1;font-weight:800;letter-spacing:.2px;text-decoration:underline;text-underline-offset:2mm;text-decoration-thickness:.35mm;color:#111827}
+.rpo-party-meta{display:grid;grid-template-columns:1fr 1fr;border:.3mm solid #64748b}.rpo-vendor-box,.rpo-meta-box{min-height:44mm;padding:3mm 4mm}.rpo-vendor-box{border-right:.3mm solid #94a3b8;white-space:pre-line}.rpo-vendor-box p{margin:0 0 1.2mm}.rpo-label{font-size:8.5px;font-weight:700}.rpo-vendor-name{font-size:10.2px;font-weight:800;color:#111827}.rpo-meta-box{display:flex;flex-direction:column;gap:1.05mm}.rpo-meta-box>div{display:grid;grid-template-columns:31mm 1fr;gap:2mm}.rpo-meta-box>div b{font-size:8.7px}.rpo-meta-box>div b:after{content:":";float:right;margin-right:2mm}.rpo-meta-box>div span{font-size:8.8px;overflow-wrap:anywhere}
+.rpo-reference-block{margin:3.2mm 1mm 2.6mm}.rpo-reference-block p{display:grid;grid-template-columns:15mm 3mm 1fr;margin:0 0 1.1mm}.rpo-reference-block b{font-weight:800}.rpo-opening{margin:0 1mm 2.8mm;font-size:8.8px;line-height:1.5}
+.rpo-items{width:100%;border-collapse:collapse;table-layout:fixed;font-size:8.5px}.rpo-items thead{display:table-header-group}.rpo-items tr{break-inside:avoid;page-break-inside:avoid}.rpo-items th,.rpo-items td{border:.25mm solid #64748b;padding:2mm 1.4mm;vertical-align:top}.rpo-items th{background:#f8fafc;text-align:center;font-weight:800;color:#1e293b}.rpo-items tbody td{min-height:10mm}.rpo-sl{width:9mm}.rpo-hsn{width:21mm}.rpo-qty{width:12mm}.rpo-uom{width:14mm}.rpo-rate{width:24mm}.rpo-amount{width:27mm}.rpo-desc{white-space:pre-line}.rpo-center{text-align:center;vertical-align:middle!important}.rpo-right{text-align:right;vertical-align:middle!important;font-variant-numeric:tabular-nums}
+.rpo-total-grid{display:grid;grid-template-columns:1fr 82mm;border:.25mm solid #64748b;border-top:0;break-inside:avoid;page-break-inside:avoid}.rpo-words{padding:3mm;display:flex;gap:2mm;align-items:flex-start}.rpo-words b{white-space:nowrap}.rpo-words span{font-weight:600}.rpo-totals{width:100%;border-collapse:collapse}.rpo-totals td{border-left:.25mm solid #94a3b8;border-bottom:.2mm solid #cbd5e1;padding:1.45mm 2mm}.rpo-totals td:last-child{text-align:right;font-variant-numeric:tabular-nums}.rpo-totals tr:last-child td{border-bottom:0}.rpo-grand td{font-weight:900;background:#f8fafc;font-size:9px;color:#111827}
+.rpo-bottom-grid{display:grid;grid-template-columns:1.05fr .95fr;margin-top:4mm;border-top:.35mm solid #334155;break-inside:avoid;page-break-inside:avoid}.rpo-terms{padding:3mm 5mm 2mm 1mm;border-right:.25mm solid #cbd5e1;min-height:49mm}.rpo-section-title{margin:0 0 1.6mm;font-size:9px;font-weight:900;color:#172554}.rpo-terms ol{margin:0;padding-left:5mm}.rpo-terms li{margin:0 0 1.2mm}.rpo-terms p{margin:.8mm 0}.rpo-small-top{margin-top:3mm}.rpo-muted{color:#64748b}.rpo-delivery-sign{display:flex;flex-direction:column;justify-content:space-between;min-height:49mm;padding:3mm 1mm 1mm 6mm}.rpo-delivery-sign p{margin:0 0 1mm}.rpo-delivery-name{font-size:9.2px;font-weight:800}.rpo-signature{margin-top:4mm;text-align:left;font-weight:800}.rpo-signature>p{font-size:9px}.rpo-signature img{display:block;width:48mm;height:23mm;object-fit:contain;object-position:left center;margin:.5mm 0}.rpo-signature-space{height:16mm}.rpo-signature>div:last-child{width:48mm;border-top:.25mm solid #64748b;padding-top:1mm;text-align:center;font-size:8.5px}.rpo-footer{margin-top:3mm;border-top:.35mm solid #0d4e8a;padding-top:1.5mm;text-align:center;font-size:7.2px;font-weight:700;color:#0d4e8a}
+@media screen and (max-width:900px){.ratneswar-po-wrap{justify-content:flex-start;overflow:auto}.ratneswar-po-page{box-shadow:none}}
+@media print{
+  @page{size:A4 portrait;margin:0}
+  .ratneswar-po-wrap{display:block!important;width:210mm!important;margin:0!important;padding:0!important}
+  .ratneswar-po-page{width:210mm!important;min-height:297mm!important;margin:0!important;padding:7mm 7.5mm 6mm!important;box-shadow:none!important;border:0!important;overflow:visible!important}
+  .rpo-items thead{display:table-header-group!important}.rpo-items tr,.rpo-total-grid,.rpo-bottom-grid,.rpo-letterhead,.rpo-party-meta{break-inside:avoid!important;page-break-inside:avoid!important}
+}
+
+/* Expenses & Payments management PDF view */
+.expense-management-report{font-family:Arial,Helvetica,sans-serif;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+@media print{
+  .expense-management-report{box-sizing:border-box!important;width:210mm!important;min-height:297mm!important;margin:0!important;padding:11mm!important;border:0!important;border-radius:0!important;box-shadow:none!important;color:#111827!important;background:#fff!important}
+  .expense-management-report table{width:100%!important;border-collapse:collapse!important}.expense-management-report tr{break-inside:avoid!important;page-break-inside:avoid!important}
+}
+.invoice-issuer-wordmark{max-width:92mm;text-align:right;font-size:16px;line-height:1.15;font-weight:900;letter-spacing:.02em;text-transform:uppercase;color:#111827}
+.invoice-signature-space{height:24mm;max-width:43mm;margin:0 auto}
+.rq-signature-space{display:block;height:24mm;max-width:45mm;margin:0 auto}
