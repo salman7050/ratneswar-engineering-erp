@@ -1,10 +1,5 @@
 [build]
-  # One-time-safe recovery for migration 20260810000100_private_signature_cleanup:
-  # - If it is currently FAILED, Prisma marks it rolled back so the corrected SQL can re-run.
-  # - After it succeeds, migrate resolve returns an error because successful migrations cannot
-  #   be marked rolled back; `|| true` intentionally ignores only that recovery probe.
-  # - `db:deploy` still runs normally and will fail the build on any real database error.
-  command = "(npx prisma migrate resolve --rolled-back 20260810000100_private_signature_cleanup || true) && npm run db:deploy && npm run build"
+  command = "npm run db:deploy && npm run build"
   publish = ".next"
 
 [build.environment]

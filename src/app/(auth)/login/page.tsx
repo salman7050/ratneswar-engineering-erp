@@ -12,7 +12,24 @@ import { Button } from "@/components/ui/button";
 import { Muted } from "@/components/ui/typography";
 import { createClient } from "@/lib/supabase/client";
 
-export default function LoginPage() {
+function LoginCardFallback() {
+  return (
+    <Card variant="glass" className="shadow-soft-xl">
+      <CardHeader className="items-center gap-2 pb-2 text-center">
+        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-brand-gold-light to-brand-gold shadow-glow-gold">
+          <Zap className="h-6 w-6 text-brand-navy" fill="currentColor" />
+        </div>
+        <h2 className="text-lg font-semibold">Sign in to your workspace</h2>
+        <Muted className="text-xs">Loading secure sign-in…</Muted>
+      </CardHeader>
+      <CardContent>
+        <div className="h-40 animate-pulse rounded-xl bg-white/5" />
+      </CardContent>
+    </Card>
+  );
+}
+
+function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const rawRedirect = searchParams.get("redirectTo");
@@ -100,7 +117,11 @@ export default function LoginPage() {
               </p>
             )}
 
-            <div className="flex justify-end"><Link href="/forgot-password" className="text-xs text-brand-gold-light hover:underline">Forgot password?</Link></div>
+            <div className="flex justify-end">
+              <Link href="/forgot-password" className="text-xs text-brand-gold-light hover:underline">
+                Forgot password?
+              </Link>
+            </div>
 
             <Button type="submit" variant="gold" size="lg" loading={loading} className="mt-1">
               Sign in
@@ -109,5 +130,13 @@ export default function LoginPage() {
         </CardContent>
       </Card>
     </motion.div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <React.Suspense fallback={<LoginCardFallback />}>
+      <LoginForm />
+    </React.Suspense>
   );
 }
