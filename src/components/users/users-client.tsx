@@ -19,10 +19,11 @@ import type { AppRole } from "@/types";
 import type { UserListItem } from "@/lib/queries/users";
 
 const ROLES: AppRole[] = ["ADMIN", "OWNER"];
+type EditableRole = "ADMIN" | "OWNER";
 
 function UserEditor({ user }: { user: UserListItem }) {
   const [open, setOpen] = React.useState(false);
-  const [form, setForm] = React.useState({ name: user.name, phone: user.phone ?? "", role: user.role, isActive: user.isActive });
+  const [form, setForm] = React.useState({ name: user.name, phone: user.phone ?? "", role: user.role as EditableRole, isActive: user.isActive });
   const { run: save, loading } = useAction(updateAppUser, { successMessage: "User updated", onSuccess: () => setOpen(false) });
 
   return (
@@ -34,7 +35,7 @@ function UserEditor({ user }: { user: UserListItem }) {
           <div className="flex flex-col gap-1.5"><Label>Name</Label><Input value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} /></div>
           <div className="flex flex-col gap-1.5"><Label>Phone</Label><Input value={form.phone} onChange={(event) => setForm({ ...form, phone: event.target.value })} /></div>
           <div className="flex flex-col gap-1.5"><Label>Role</Label>
-            <Select value={form.role} onValueChange={(role) => setForm({ ...form, role: role as AppRole })}>
+            <Select value={form.role} onValueChange={(role) => setForm({ ...form, role: role as EditableRole })}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>{ROLES.map((role) => <SelectItem key={role} value={role}>{role}</SelectItem>)}</SelectContent>
             </Select>
@@ -66,7 +67,7 @@ function PasswordReset({ user }: { user: UserListItem }) {
 
 export function UsersClient({ users }: { users: UserListItem[] }) {
   const [open, setOpen] = React.useState(false);
-  const [form, setForm] = React.useState({ name: "", email: "", phone: "", role: "OWNER" as AppRole, password: "" });
+  const [form, setForm] = React.useState({ name: "", email: "", phone: "", role: "OWNER" as EditableRole, password: "" });
   const { run: create, loading } = useAction(createAppUser, {
     successMessage: "User created",
     onSuccess: () => {
@@ -93,7 +94,7 @@ export function UsersClient({ users }: { users: UserListItem[] }) {
               <div className="flex flex-col gap-1.5"><Label>Email</Label><Input type="email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} /></div>
               <div className="flex flex-col gap-1.5"><Label>Phone</Label><Input value={form.phone} onChange={(event) => setForm({ ...form, phone: event.target.value })} /></div>
               <div className="flex flex-col gap-1.5"><Label>Role</Label>
-                <Select value={form.role} onValueChange={(role) => setForm({ ...form, role: role as AppRole })}>
+                <Select value={form.role} onValueChange={(role) => setForm({ ...form, role: role as EditableRole })}>
                   <SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{ROLES.map((role) => <SelectItem key={role} value={role}>{role}</SelectItem>)}</SelectContent>
                 </Select>
               </div>

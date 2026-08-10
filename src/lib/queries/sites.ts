@@ -35,6 +35,7 @@ export async function getSiteDetail(id: string) {
       materials: { orderBy: { receivedDate: "desc" } },
       inventory: { orderBy: { name: "asc" } },
       assets: { orderBy: { name: "asc" } },
+      _count: { select: { employees: true, tenders: true, invoices: true, assets: true, billingContracts: true } },
     },
   });
 

@@ -2,6 +2,7 @@
 
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
+import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { authorize, ok, fail, zodError } from "@/lib/actions/action-utils";
 import { generateDocumentNumber } from "@/lib/document-number";
@@ -113,7 +114,15 @@ function computeTotals(items: z.infer<typeof itemSchema>[]) {
 }
 
 async function logActivity(action: string, poId: string, userId: string, metadata?: Record<string, unknown>) {
-  await prisma.auditLog.create({ data: { action, entityType: "PurchaseOrder", entityId: poId, userId, metadata } });
+  await prisma.auditLog.create({
+    data: {
+      action,
+      entityType: "PurchaseOrder",
+      entityId: poId,
+      userId,
+      metadata: metadata as Prisma.InputJsonValue | undefined,
+    },
+  });
 }
 
 export async function createPurchaseOrder(input: z.infer<typeof poSchema>) {
