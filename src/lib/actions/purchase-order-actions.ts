@@ -81,7 +81,7 @@ function cleanEmpty<T extends Record<string, unknown>>(data: T): T {
   return out;
 }
 
-/** Per-item + PO-level totals. Discount and GST are computed per line, then summed â€”
+/** Per-item + PO-level totals. Discount and GST are computed per line, then summed —
  * this is the only way the printed item table and the header GST split reconcile. */
 function computeTotals(items: z.infer<typeof itemSchema>[]) {
   let subtotal = 0;
@@ -172,7 +172,7 @@ export async function updatePurchaseOrder(id: string, input: z.infer<typeof poSc
 
   const existing = await prisma.purchaseOrder.findUnique({ where: { id }, select: { status: true } });
   if (!existing) return fail("Purchase order not found.");
-  if (existing.status !== "DRAFT") return fail("Only draft purchase orders can be edited â€” duplicate it instead.");
+  if (existing.status !== "DRAFT") return fail("Only draft purchase orders can be edited — duplicate it instead.");
 
   const parsed = poSchema.safeParse(input);
   if (!parsed.success) return zodError(parsed.error);
@@ -217,7 +217,7 @@ export async function deletePurchaseOrder(id: string) {
 
   const existing = await prisma.purchaseOrder.findUnique({ where: { id }, select: { status: true } });
   if (!existing) return fail("Purchase order not found.");
-  if (existing.status !== "DRAFT") return fail("Only draft purchase orders can be deleted â€” cancel it instead.");
+  if (existing.status !== "DRAFT") return fail("Only draft purchase orders can be deleted — cancel it instead.");
 
   await prisma.purchaseOrder.delete({ where: { id } });
   revalidatePath(LIST_PATH);
@@ -397,7 +397,7 @@ export async function rejectPurchaseOrder(input: z.infer<typeof rejectSchema>) {
   return ok(updated);
 }
 
-/** Send an approved PO back to draft for edits â€” restarts the approval chain from scratch. */
+/** Send an approved PO back to draft for edits — restarts the approval chain from scratch. */
 export async function reopenAsDraft(id: string) {
   const { user, error } = await authorize(MODULE, "edit");
   if (!user) return error;

@@ -25,7 +25,7 @@ export async function getSiteOptions() {
 /** Lightweight active-user list for "assign to" pickers. */
 export async function getTeamOptions() {
   return prisma.user.findMany({
-    where: { isActive: true },
+    where: { isActive: true, role: { in: ["OWNER", "ADMIN"] } },
     select: { id: true, name: true, role: true },
     orderBy: { name: "asc" },
   });

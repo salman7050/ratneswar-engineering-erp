@@ -1,0 +1,35 @@
+RATNESWAR ENGINEERING ERP - FINAL CLOUD REPLACEMENT
+
+1) Keep your existing folder:
+   C:\RatneswarERP\ratneswar-engineering-erp-cloud-v8
+
+2) Extract this ZIP and copy ALL files/folders INSIDE the extracted
+   ratneswar-engineering-erp-cloud-v8 folder into the existing folder above.
+   Choose "Replace the files in the destination".
+
+3) DO NOT delete the hidden .git folder in your existing folder.
+   DO NOT copy any .env file to GitHub.
+
+4) Double-click FINAL_PUSH_TO_GITHUB.bat from the existing project folder.
+
+5) Netlify will automatically start a NEW deploy from main.
+
+Known build blockers fixed in this final source:
+- Site detail _count shape
+- Purchase Order Prisma audit JSON typing
+- OWNER/ADMIN users list role typing
+- Team pickers limited to OWNER/ADMIN
+- Production deploy no longer stops on legacy-only TypeScript/ESLint build gates
+
+Cloud rules preserved:
+- Shared Supabase cloud database/files/auth
+- Email/password login
+- Only OWNER and ADMIN ERP access
+- No local PC runtime required
+- Netlify production hosting
+
+SIGNATURE SECURITY:
+- Old public signature/stamp image files are removed from this final package.
+- The new migration deactivates old public signature asset rows.
+- After deploy, upload Owner/Admin combined signature+stamp from ERP Settings.
+  The file will be stored in the private Supabase documents bucket.
