@@ -153,7 +153,9 @@ export async function updateBillingContract(id: string, input: z.infer<typeof co
 }
 
 function monthRange(month: string, cycleStartDay = 1) {
-  const [year, monthNumber] = month.split("-").map(Number);
+  const [yearPart, monthPart] = month.split("-");
+  const year = Number(yearPart);
+  const monthNumber = Number(monthPart);
   const pad = (value: number) => String(value).padStart(2, "0");
   const nextMonthDate = new Date(Date.UTC(year, monthNumber, 1));
   const nextYear = nextMonthDate.getUTCFullYear();
