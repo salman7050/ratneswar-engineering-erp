@@ -15,14 +15,23 @@ export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
   const redirectTo = safeRedirect(searchParams.get("redirectTo"));
+  const isPasswordRecovery = redirectTo === "/reset-password";
 
-  if (code) {
-    const supabase = createClient();
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
-    if (error) {
-      return NextResponse.redirect(`${origin}/login?error=auth_failed`);
-    }
+  if (!code) {
+    const target = isPasswordRecovery
+      ? "/forgot-password?error=recovery_link_invalid"
+      : "/login?error=auth_failed";
+    return NextResponse.redirect(new URL(target, origin));
   }
 
-  return NextResponse.redirect(`${origin}${redirectTo}`);
+  const supabase = createClient();
+  const { error } = await supabase.auth.exchangeCodeForSession(code);
+  if (error) {
+    const target = isPasswordRecovery
+      ? "/forgot-password?error=recovery_link_invalid"
+      : "/login?error=auth_failed";
+    return NextResponse.redirect(new URL(target, origin));
+  }
+
+  return NextResponse.redirect(new URL(redirectTo, origin));
 }
