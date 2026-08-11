@@ -1,6 +1,7 @@
 import "server-only";
 import { prisma } from "@/lib/prisma";
 import type { AppUser } from "@/types";
+import { withDatabaseRetry } from "@/lib/db-retry";
 
 const OPEN = ["PENDING", "IN_PROGRESS", "WAITING"] as const;
 
@@ -33,7 +34,7 @@ export async function getCleanDashboardData(user: AppUser) {
     recentPOs,
     siteOptions,
     teamOptions,
-  ] = await Promise.all([
+  ] = await withDatabaseRetry(() => Promise.all([
     prisma.task.findMany({
       where: { assignedToId: user.id, dueDate: { gte: start, lt: end } },
       include: { site: { select: { id: true, name: true } }, _count: { select: { comments: true } } },
@@ -94,7 +95,7 @@ export async function getCleanDashboardData(user: AppUser) {
       select: { id: true, name: true },
       orderBy: { name: "asc" },
     }),
-  ]);
+  ]), "dashboard-data");
 
   const completedToday = todayTasks.filter((task) => task.status === "COMPLETED").length;
   const openToday = todayTasks.filter((task) => OPEN.includes(task.status as (typeof OPEN)[number])).length;

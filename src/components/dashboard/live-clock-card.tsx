@@ -9,7 +9,7 @@ export function LiveClockCard() {
     const id = window.setInterval(() => setNow(new Date()), 1000);
     return () => window.clearInterval(id);
   }, []);
-  if (!now) return <div className="h-[154px] animate-pulse rounded-2xl border border-slate-200 bg-white" />;
+  if (!now) return <div className="erp-glass-surface h-[154px] animate-pulse rounded-2xl" />;
 
   const seconds = now.getSeconds();
   const minutes = now.getMinutes();
@@ -29,7 +29,7 @@ export function LiveClockCard() {
   };
 
   return (
-    <section className="flex min-h-[154px] items-center gap-5 rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-sm">
+    <section className="erp-glass-surface flex min-h-[154px] items-center gap-5 rounded-2xl px-5 py-4">
       <div className="relative h-[116px] w-[116px] shrink-0 rounded-full border-2 border-slate-300 bg-[#fbfbfa] shadow-[inset_0_0_0_4px_rgba(15,23,42,.025),0_7px_22px_rgba(15,23,42,.08)]" aria-label="Live analog clock">
         {[...Array(60)].map((_, index) => {
           const major = index % 5 === 0;

@@ -21,8 +21,9 @@ import { cn } from "@/lib/utils";
 export type ChartPoint = Record<string, string | number>;
 
 const CHART_COLORS = {
-  gold: "#C6A15B",
-  goldLight: "#E4C888",
+  /* Legacy key retained; approved palette uses teal instead of gold. */
+  gold: "#14A77C",
+  goldLight: "#56B6F7",
   blue: "#5896FF",
   green: "#34D399",
   red: "#F87171",

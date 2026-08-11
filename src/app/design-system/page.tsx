@@ -110,17 +110,17 @@ export default function DesignSystemPage() {
             transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
             className="relative z-10 mx-auto flex max-w-4xl flex-col items-center gap-5 text-center"
           >
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-gold-light to-brand-gold shadow-glow-gold">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-blue-600 shadow-glow-gold">
               <Zap className="h-7 w-7 text-brand-navy" fill="currentColor" />
             </div>
             <Eyebrow className="text-brand-gold-light">Ratneswar Engineering · Design System</Eyebrow>
             <H1 className="text-gradient-white">
-              Dark Luxury. <span className="text-gradient-gold">Glass. Precision.</span>
+              Soft Glass. <span className="text-gradient-gold">Clarity. Precision.</span>
             </H1>
             <Lead className="max-w-xl">
               A reusable component system — glassmorphism surfaces, soft 3D depth, and
               restrained motion. Built to feel like Apple, Tesla, and Linear had a
-              child, and gave it a gold signature.
+              child, and gave it a clean blue-green signature.
             </Lead>
           </motion.div>
         </header>
@@ -161,7 +161,7 @@ export default function DesignSystemPage() {
               <Swatch name="Background" className="bg-background" />
               <Swatch name="Card" className="bg-card" />
               <Swatch name="Primary" className="bg-primary" />
-              <Swatch name="Gold Accent" className="bg-gradient-to-br from-brand-gold-light to-brand-gold" />
+              <Swatch name="Blue-Green Accent" className="bg-gradient-to-br from-emerald-500 to-blue-600" />
               <Swatch name="Success" className="bg-success" />
               <Swatch name="Warning" className="bg-warning" />
               <Swatch name="Destructive" className="bg-destructive" />
@@ -331,7 +331,7 @@ export default function DesignSystemPage() {
                       <div key={t.name} className="flex items-center gap-2 text-sm">
                         <span
                           className="h-2.5 w-2.5 rounded-full"
-                          style={{ background: ["#C6A15B", "#5896FF", "#34D399", "#F87171"][i] }}
+                          style={{ background: ["#14A77C", "#5896FF", "#34D399", "#F87171"][i] }}
                         />
                         {t.name} <span className="text-muted-foreground">({t.count})</span>
                       </div>

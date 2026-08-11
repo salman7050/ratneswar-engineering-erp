@@ -4,8 +4,8 @@
 
 @layer base {
   :root {
-    /* Professional light workspace — default for shared team use */
-    --background: 220 25% 97%;
+    /* Soft Glass Grid — approved Ratneswar blue/green workspace */
+    --background: 208 48% 97%;
     --foreground: 222 47% 9%;
 
     --card: 0 0% 100%;
@@ -14,16 +14,16 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 9%;
 
-    --primary: 222 47% 9%;
+    --primary: 210 82% 46%;
     --primary-foreground: 210 40% 98%;
 
-    --secondary: 220 20% 93%;
+    --secondary: 210 42% 94%;
     --secondary-foreground: 222 47% 9%;
 
-    --muted: 220 20% 93%;
+    --muted: 210 38% 94%;
     --muted-foreground: 215 16% 42%;
 
-    --accent: 38 52% 52%;
+    --accent: 210 82% 48%;
     --accent-foreground: 210 40% 98%;
 
     --destructive: 0 72% 51%;
@@ -32,31 +32,31 @@
     --success: 152 60% 34%;
     --success-foreground: 210 40% 98%;
 
-    --warning: 38 92% 46%;
-    --warning-foreground: 222 47% 9%;
+    --warning: 350 72% 52%;
+    --warning-foreground: 0 0% 100%;
 
     --info: 210 90% 48%;
     --info-foreground: 210 40% 98%;
 
-    --border: 220 20% 88%;
-    --input: 220 20% 88%;
-    --ring: 222 47% 9%;
+    --border: 210 34% 88%;
+    --input: 210 34% 86%;
+    --ring: 210 82% 48%;
 
-    --radius: 0.9rem;
+    --radius: 1rem;
 
     --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 222 47% 9%;
     --sidebar-border: 220 20% 90%;
-    --sidebar-accent: 220 20% 94%;
-    --sidebar-accent-foreground: 222 47% 9%;
+    --sidebar-accent: 211 78% 95%;
+    --sidebar-accent-foreground: 211 82% 43%;
 
-    --glass-bg: rgba(255, 255, 255, 0.55);
-    --glass-border: rgba(15, 23, 42, 0.08);
-    --glass-highlight: rgba(255, 255, 255, 0.6);
+    --glass-bg: rgba(255, 255, 255, 0.76);
+    --glass-border: rgba(104, 155, 199, 0.20);
+    --glass-highlight: rgba(255, 255, 255, 0.86);
   }
 
   .dark {
-    /* ── Dark Luxury — deep charcoal-navy, glass surfaces, gold accent ── */
+    /* Deep blue glass theme — no gold accents. */
     --background: 224 42% 5%;
     --foreground: 210 25% 95%;
 
@@ -75,7 +75,7 @@
     --muted: 222 28% 13%;
     --muted-foreground: 215 15% 62%;
 
-    --accent: 38 58% 62%;
+    --accent: 207 86% 64%;
     --accent-foreground: 224 44% 8%;
 
     --destructive: 0 72% 60%;
@@ -84,7 +84,7 @@
     --success: 152 55% 50%;
     --success-foreground: 224 44% 7%;
 
-    --warning: 38 92% 58%;
+    --warning: 350 78% 66%;
     --warning-foreground: 224 44% 7%;
 
     --info: 210 90% 64%;
@@ -92,7 +92,7 @@
 
     --border: 222 24% 17%;
     --input: 222 24% 17%;
-    --ring: 38 58% 62%;
+    --ring: 207 86% 64%;
 
     --sidebar-background: 224 46% 4%;
     --sidebar-foreground: 210 22% 88%;
@@ -117,12 +117,12 @@
     @apply bg-background text-foreground antialiased;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
     background-image:
-      radial-gradient(circle at 12% 8%, hsl(var(--accent) / 0.06), transparent 38%),
-      radial-gradient(circle at 88% 92%, hsl(var(--info) / 0.05), transparent 42%);
+      radial-gradient(circle at 8% 88%, rgba(16, 185, 129, 0.10), transparent 30%),
+      radial-gradient(circle at 88% 10%, rgba(47, 139, 226, 0.13), transparent 34%);
     background-attachment: fixed;
   }
   ::selection {
-    background: hsl(var(--accent) / 0.35);
+    background: hsl(var(--accent) / 0.24);
     color: hsl(var(--foreground));
   }
   :focus-visible {
@@ -162,14 +162,14 @@
   .card-3d::before {
     content: "";
     @apply pointer-events-none absolute inset-0 rounded-2xl opacity-[0.5];
-    background: linear-gradient(180deg, hsl(var(--foreground) / 0.05), transparent 40%);
+    background: linear-gradient(180deg, rgba(255,255,255,.82), transparent 42%);
   }
   .card-3d-hover {
     @apply card-3d hover:-translate-y-[3px] hover:shadow-3d-hover;
   }
 
   .text-gradient-gold {
-    background: linear-gradient(135deg, #f0d9a8 0%, #c6a15b 55%, #a9803e 100%);
+    background: linear-gradient(135deg, #10a86f 0%, #1778d3 55%, #0d5aa8 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
@@ -186,6 +186,31 @@
     @apply pointer-events-none absolute inset-0 opacity-[0.03];
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   }
+}
+
+/* Option 3: subtle mesh and dot-grid shared by all authenticated pages. */
+.erp-shell {
+  background:
+    radial-gradient(circle at 6% 92%, rgba(16,185,129,.12), transparent 28%),
+    radial-gradient(circle at 92% 8%, rgba(59,130,246,.14), transparent 30%),
+    #f3f8fc;
+}
+.erp-shell::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: .22;
+  background-image: radial-gradient(rgba(72,124,169,.32) .65px, transparent .65px);
+  background-size: 22px 22px;
+  mask-image: linear-gradient(to bottom right, transparent 12%, #000 52%, transparent 92%);
+}
+.erp-glass-surface {
+  background: rgba(255,255,255,.76);
+  border: 1px solid rgba(117,164,204,.20);
+  box-shadow: 0 22px 60px -34px rgba(24,75,119,.36), inset 0 1px 0 rgba(255,255,255,.88);
+  backdrop-filter: blur(22px) saturate(145%);
+  -webkit-backdrop-filter: blur(22px) saturate(145%);
 }
 
 /* ═══════════════════ Scrollbars, loading, misc utilities ═══════════════════ */

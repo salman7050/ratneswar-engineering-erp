@@ -12,7 +12,7 @@ const chipVariants = cva(
         warning: "border-warning/25 bg-warning/10 text-warning",
         destructive: "border-destructive/25 bg-destructive/10 text-destructive",
         info: "border-info/25 bg-info/10 text-info",
-        gold: "border-brand-gold/30 bg-brand-gold/10 text-brand-gold-light",
+        gold: "border-blue-200 bg-blue-50 text-blue-700",
       },
     },
     defaultVariants: { tone: "neutral" },
@@ -25,7 +25,7 @@ const dotColor: Record<string, string> = {
   warning: "bg-warning",
   destructive: "bg-destructive",
   info: "bg-info",
-  gold: "bg-brand-gold-light",
+  gold: "bg-blue-500",
 };
 
 export interface StatusChipProps

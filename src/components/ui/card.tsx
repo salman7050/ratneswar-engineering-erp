@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 const cardVariants = cva("relative text-card-foreground transition-all duration-300 ease-out", {
   variants: {
     variant: {
-      default: "rounded-2xl border border-border bg-card shadow-soft-sm",
+      default: "rounded-2xl border border-blue-100/80 bg-white/80 shadow-soft-sm backdrop-blur-xl",
       glass: "glass-card",
       "3d": "card-3d",
     },

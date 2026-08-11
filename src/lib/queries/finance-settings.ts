@@ -1,10 +1,17 @@
 import "server-only";
 import { prisma } from "@/lib/prisma";
 import { resolveStoredFileUrl } from "@/lib/supabase/storage-server";
+import { withDatabaseRetry } from "@/lib/db-retry";
 
 export async function getCompanySettings() {
-  const existing = await prisma.companySettings.findUnique({ where: { id: "singleton" } });
-  const record = existing ?? await prisma.companySettings.create({ data: { id: "singleton" } });
+  const record = await withDatabaseRetry(
+    () => prisma.companySettings.upsert({
+      where: { id: "singleton" },
+      update: {},
+      create: { id: "singleton" },
+    }),
+    "company-settings"
+  );
   return { ...record, ownerApprovalThreshold: Number(record.ownerApprovalThreshold) };
 }
 

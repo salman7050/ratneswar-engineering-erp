@@ -65,8 +65,9 @@ const config: Config = {
         brand: {
           navy: "#0F2347",
           "navy-light": "#1B3A6B",
-          gold: "#C6A15B",
-          "gold-light": "#E4C888",
+          /* Legacy class aliases now point to the approved blue palette. */
+          gold: "#1675D1",
+          "gold-light": "#45A4F1",
         },
       },
       borderRadius: {
@@ -76,13 +77,13 @@ const config: Config = {
         sm: "calc(var(--radius) - 4px)",
       },
       boxShadow: {
-        "soft-sm": "0 1px 2px rgba(0,0,0,.24), 0 1px 1px rgba(0,0,0,.12)",
-        "soft-md": "0 4px 16px -4px rgba(0,0,0,.35), 0 2px 6px -2px rgba(0,0,0,.25)",
-        "soft-lg": "0 12px 32px -8px rgba(0,0,0,.45), 0 4px 12px -4px rgba(0,0,0,.3)",
-        "soft-xl": "0 24px 60px -12px rgba(0,0,0,.55), 0 8px 24px -8px rgba(0,0,0,.35)",
-        "3d": "0 1px 0 rgba(255,255,255,.06) inset, 0 -1px 0 rgba(0,0,0,.3) inset, 0 14px 34px -10px rgba(0,0,0,.5)",
-        "3d-hover": "0 1px 0 rgba(255,255,255,.09) inset, 0 -1px 0 rgba(0,0,0,.3) inset, 0 22px 46px -12px rgba(0,0,0,.6)",
-        "glow-gold": "0 0 0 1px rgba(198,161,91,.35), 0 8px 30px -6px rgba(198,161,91,.45)",
+        "soft-sm": "0 6px 20px -12px rgba(37,85,132,.20)",
+        "soft-md": "0 12px 30px -16px rgba(37,85,132,.25)",
+        "soft-lg": "0 18px 48px -20px rgba(37,85,132,.30)",
+        "soft-xl": "0 28px 72px -26px rgba(37,85,132,.34)",
+        "3d": "0 1px 0 rgba(255,255,255,.82) inset, 0 14px 38px -22px rgba(37,85,132,.28)",
+        "3d-hover": "0 1px 0 rgba(255,255,255,.9) inset, 0 24px 52px -24px rgba(37,85,132,.34)",
+        "glow-gold": "0 0 0 1px rgba(22,117,209,.22), 0 10px 30px -12px rgba(22,117,209,.42)",
         "glow-blue": "0 0 0 1px rgba(88,150,255,.35), 0 8px 30px -6px rgba(88,150,255,.4)",
         "glow-green": "0 0 0 1px rgba(52,211,153,.3), 0 8px 26px -6px rgba(52,211,153,.35)",
         "glow-red": "0 0 0 1px rgba(248,113,113,.3), 0 8px 26px -6px rgba(248,113,113,.35)",

@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 
 const PRIORITY_STYLE: Record<string, string> = {
   LOW: "border-emerald-100 bg-emerald-50 text-emerald-700",
-  MEDIUM: "border-amber-100 bg-amber-50 text-amber-700",
+  MEDIUM: "border-blue-100 bg-blue-50 text-blue-700",
   HIGH: "border-rose-100 bg-rose-50 text-rose-700",
   URGENT: "border-red-200 bg-red-50 text-red-700",
 };
@@ -79,7 +79,7 @@ export function DailyWorkPanels({
   return (
     <>
       <div className="grid gap-4 xl:grid-cols-2">
-        <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <section className="erp-glass-surface overflow-hidden rounded-2xl">
           <header className="flex items-center justify-between gap-3 border-b border-slate-100 px-4 py-3.5">
             <div className="flex items-center gap-2"><CalendarDays className="h-4 w-4 text-blue-600" /><h2 className="font-semibold text-slate-900">Today&apos;s Work</h2></div>
             <div className="flex items-center gap-2">
@@ -96,15 +96,15 @@ export function DailyWorkPanels({
           </footer>
         </section>
 
-        <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <section className="erp-glass-surface overflow-hidden rounded-2xl">
           <header className="flex items-center justify-between border-b border-slate-100 px-4 py-3.5">
-            <div className="flex items-center gap-2"><Clock3 className="h-4 w-4 text-amber-600" /><h2 className="font-semibold text-slate-900">Pending Works</h2></div>
+            <div className="flex items-center gap-2"><Clock3 className="h-4 w-4 text-rose-600" /><h2 className="font-semibold text-slate-900">Pending Works</h2></div>
             <Badge variant="warning">{pendingWorks.length} pending</Badge>
           </header>
           <div className="min-h-[250px]">
             {pendingWorks.length ? pendingWorks.slice(0, 8).map((task) => <WorkRow key={task.id} task={task} pending />) : <div className="flex min-h-[250px] flex-col items-center justify-center px-6 text-center"><Check className="h-7 w-7 text-emerald-400" /><p className="mt-3 text-sm font-medium text-slate-600">No previous work pending.</p><p className="mt-1 text-xs text-slate-400">Completed work disappears automatically.</p></div>}
           </div>
-          <div className="mx-4 mb-4 flex items-start gap-2 rounded-xl border border-amber-100 bg-amber-50 px-3 py-2.5 text-[11px] leading-5 text-amber-800"><CircleAlert className="mt-0.5 h-4 w-4 shrink-0" />Unfinished work automatically stays here until you tick it complete.</div>
+          <div className="mx-4 mb-4 flex items-start gap-2 rounded-xl border border-rose-100 bg-rose-50/80 px-3 py-2.5 text-[11px] leading-5 text-rose-700"><CircleAlert className="mt-0.5 h-4 w-4 shrink-0" />Unfinished work automatically stays here until you tick it complete.</div>
         </section>
       </div>
       <ElevenPmReminder pendingCount={todayTasks.filter((task) => !["COMPLETED", "CANCELLED"].includes(task.status)).length} />

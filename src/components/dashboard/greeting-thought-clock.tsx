@@ -45,14 +45,15 @@ export function GreetingThoughtClock({ name }: { name: string }) {
 
   return (
     <div className="grid gap-4 xl:grid-cols-[1.15fr_.72fr_.78fr]">
-      <section className="flex min-h-[154px] flex-col justify-center rounded-2xl border border-slate-200 bg-white px-6 py-5 shadow-sm">
+      <section className="erp-glass-surface relative flex min-h-[154px] flex-col justify-center overflow-hidden rounded-2xl px-6 py-5">
+        <span className="absolute -right-12 -top-12 h-36 w-36 rounded-full bg-blue-200/35 blur-2xl" />
         <h1 className="text-3xl font-bold tracking-tight text-slate-950 sm:text-[34px]">
           {title}, {firstName} <span aria-hidden>👋</span>
         </h1>
         <p className="mt-2 text-sm text-slate-500">Here&apos;s what needs your attention today.</p>
       </section>
 
-      <section className="flex min-h-[154px] flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white px-6 py-5 text-center shadow-sm">
+      <section className="erp-glass-surface flex min-h-[154px] flex-col items-center justify-center rounded-2xl px-6 py-5 text-center">
         <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
           <Quote className="h-5 w-5 text-emerald-600" /> Thought of the Day
         </div>

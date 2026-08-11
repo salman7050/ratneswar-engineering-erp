@@ -38,13 +38,13 @@ export function AssistantLauncher() {
       <button
         onClick={() => handleOpen()}
         aria-label="Open AI Assistant"
-        className="no-print fixed z-40 flex h-[52px] w-[52px] items-center justify-center rounded-full bg-gradient-to-br from-brand-gold-light to-brand-gold shadow-glow-gold transition-transform hover:scale-105 active:scale-95 touch-target"
+        className="no-print fixed z-40 flex h-[52px] w-[52px] items-center justify-center rounded-2xl border border-white/70 bg-gradient-to-br from-emerald-500 to-blue-600 text-white shadow-[0_18px_36px_-16px_rgba(37,99,235,.72)] transition-transform hover:scale-105 active:scale-95 touch-target"
         style={{
           right: "max(1.5rem, env(safe-area-inset-right))",
           bottom: "max(1.5rem, calc(env(safe-area-inset-bottom) + 1rem))",
         }}
       >
-        <Sparkles className="h-5 w-5 text-brand-navy" />
+        <Sparkles className="h-5 w-5 text-white" />
       </button>
       {mounted && <AssistantPanel open={open} onOpenChange={setOpen} initialPrompt={initialPrompt} />}
     </>

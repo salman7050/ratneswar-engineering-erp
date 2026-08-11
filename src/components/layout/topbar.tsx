@@ -12,11 +12,11 @@ export function Topbar({ title, brand }: { title?: string; brand: { name: string
   const { isOnline } = usePwa();
   const user = useUser();
   const aiAllowed = user?.role === "ADMIN" || user?.role === "OWNER";
-  return <header className="sticky top-0 z-30 flex h-[72px] shrink-0 items-center gap-3 border-b border-slate-200 bg-white/95 px-4 backdrop-blur md:px-6">
+  return <header className="erp-glass-surface sticky top-0 z-30 flex h-[72px] shrink-0 items-center gap-3 rounded-[22px] px-4 md:px-6 max-md:rounded-none max-md:border-x-0 max-md:border-t-0">
     <MobileSidebar brand={brand} />
     {title && <h1 className="truncate text-base font-semibold text-slate-900">{title}</h1>}
     <div className="hidden max-w-xl flex-1 items-center md:flex"><GlobalSearch /></div>
-    {!isOnline && <span className="flex items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700"><WifiOff className="h-3.5 w-3.5" /> Offline</span>}
-    <div className="ml-auto flex items-center gap-2">{aiAllowed && <Button onClick={() => window.dispatchEvent(new CustomEvent("open-ratneswar-ai"))} size="sm" className="hidden bg-violet-700 text-white shadow-sm hover:bg-violet-800 sm:flex"><Sparkles className="h-4 w-4" /> Ratneswar AI</Button>}<div className="h-7 w-px bg-slate-200" /><UserMenu /></div>
+    {!isOnline && <span className="flex items-center gap-1.5 rounded-full bg-rose-50 px-2.5 py-1 text-xs font-medium text-rose-700"><WifiOff className="h-3.5 w-3.5" /> Offline</span>}
+    <div className="ml-auto flex items-center gap-2">{aiAllowed && <Button onClick={() => window.dispatchEvent(new CustomEvent("open-ratneswar-ai"))} size="sm" className="hidden border-0 bg-gradient-to-r from-emerald-600 to-blue-600 text-white shadow-[0_10px_24px_-14px_rgba(37,99,235,.8)] hover:from-emerald-500 hover:to-blue-500 sm:flex"><Sparkles className="h-4 w-4" /> Ratneswar AI</Button>}<div className="h-7 w-px bg-blue-100" /><UserMenu /></div>
   </header>;
 }

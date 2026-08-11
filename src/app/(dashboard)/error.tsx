@@ -17,15 +17,15 @@ export default function DashboardError({
   }, [error]);
 
   return (
-    <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 px-6 text-center">
-      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-destructive/10">
+    <div className="flex min-h-[60vh] items-center justify-center px-6 text-center">
+      <section className="erp-glass-surface flex w-full max-w-lg flex-col items-center gap-4 rounded-3xl p-8">
+      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-destructive/10">
         <AlertTriangle className="h-6 w-6 text-destructive" />
       </div>
       <div className="space-y-1">
         <h2 className="text-base font-semibold text-foreground">Something went wrong</h2>
         <p className="max-w-sm text-sm text-muted-foreground">
-          This section hit an unexpected error. You can try again, or head back to the
-          dashboard.
+          The connection was interrupted while loading this section. Your data is safe—try the request again.
         </p>
       </div>
       <div className="flex gap-2">
@@ -37,6 +37,8 @@ export default function DashboardError({
           Try again
         </Button>
       </div>
+      {error.digest && <p className="font-mono text-[10px] text-slate-400">Reference: {error.digest}</p>}
+      </section>
     </div>
   );
 }

@@ -17,64 +17,69 @@ const createUserSchema = z.object({
 });
 
 export async function createAppUser(input: z.infer<typeof createUserSchema>) {
-  const { user, error } = await authorize("users", "create");
-  if (!user) return error;
-
-  const parsed = createUserSchema.safeParse(input);
-  if (!parsed.success) return zodError(parsed.error);
-
-  const email = parsed.data.email.toLowerCase();
-  const existing = await prisma.user.findUnique({ where: { email }, select: { id: true } });
-  if (existing) return fail("A user with this email already exists.");
-
-  const supabase = createAdminClient();
-  const { data, error: authError } = await supabase.auth.admin.createUser({
-    email,
-    password: parsed.data.password,
-    email_confirm: true,
-    user_metadata: { name: parsed.data.name },
-  });
-
-  if (authError || !data.user) return fail(authError?.message ?? "Could not create authentication user.");
-
   try {
-    const record = await prisma.user.upsert({
-      where: { authId: data.user.id },
-      update: {
-        email,
-        name: parsed.data.name,
-        phone: parsed.data.phone || null,
-        role: parsed.data.role,
-        isActive: true,
-      },
-      create: {
-        authId: data.user.id,
-        email,
-        name: parsed.data.name,
-        phone: parsed.data.phone || null,
-        role: parsed.data.role,
-        isActive: true,
-      },
+    const { user, error } = await authorize("users", "create");
+    if (!user) return error;
+
+    const parsed = createUserSchema.safeParse(input);
+    if (!parsed.success) return zodError(parsed.error);
+
+    const email = parsed.data.email.toLowerCase();
+    const existing = await prisma.user.findUnique({ where: { email }, select: { id: true } });
+    if (existing) return fail("A user with this email already exists.");
+
+    const supabase = createAdminClient();
+    const { data, error: authError } = await supabase.auth.admin.createUser({
+      email,
+      password: parsed.data.password,
+      email_confirm: true,
+      user_metadata: { name: parsed.data.name },
     });
 
-    await prisma.auditLog.create({
-      data: {
-        action: "USER_CREATED",
-        entityType: "User",
-        entityId: record.id,
-        userId: user.id,
-        metadata: { email, role: parsed.data.role },
-      },
-    });
+    if (authError || !data.user) return fail(authError?.message ?? "Could not create authentication user.");
 
-    revalidatePath("/users");
-    return ok(record);
-  } catch (databaseError) {
-    // The Auth trigger may already have created a public.users profile. Remove
-    // both sides so a failed creation does not leave an orphan that blocks retry.
-    await prisma.user.deleteMany({ where: { authId: data.user.id } }).catch(() => undefined);
-    await supabase.auth.admin.deleteUser(data.user.id).catch(() => undefined);
-    return fail(databaseError instanceof Error ? databaseError.message : "Could not create user profile.");
+    try {
+      const record = await prisma.user.upsert({
+        where: { authId: data.user.id },
+        update: {
+          email,
+          name: parsed.data.name,
+          phone: parsed.data.phone || null,
+          role: parsed.data.role,
+          isActive: true,
+        },
+        create: {
+          authId: data.user.id,
+          email,
+          name: parsed.data.name,
+          phone: parsed.data.phone || null,
+          role: parsed.data.role,
+          isActive: true,
+        },
+      });
+
+      await prisma.auditLog.create({
+        data: {
+          action: "USER_CREATED",
+          entityType: "User",
+          entityId: record.id,
+          userId: user.id,
+          metadata: { email, role: parsed.data.role },
+        },
+      });
+
+      revalidatePath("/users");
+      return ok(record);
+    } catch (databaseError) {
+      // The Auth trigger may already have created a public.users profile. Remove
+      // both sides so a failed creation does not leave an orphan that blocks retry.
+      await prisma.user.deleteMany({ where: { authId: data.user.id } }).catch(() => undefined);
+      await supabase.auth.admin.deleteUser(data.user.id).catch(() => undefined);
+      return fail(databaseError instanceof Error ? databaseError.message : "Could not create user profile.");
+    }
+  } catch (error) {
+    console.error("[users:create]", error);
+    return fail(error instanceof Error ? error.message : "Could not create ERP user.");
   }
 }
 

@@ -11,10 +11,10 @@ const buttonVariants = cva(
       variant: {
         // Linear-style high-contrast primary
         default:
-          "bg-primary text-primary-foreground shadow-soft-md hover:shadow-soft-lg hover:-translate-y-px",
-        // Ratneswar gold — premium branded CTA
+          "bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-soft-md hover:from-blue-500 hover:to-blue-600 hover:shadow-soft-lg hover:-translate-y-px",
+        // Legacy name retained for compatibility; visual is approved blue-green.
         gold:
-          "bg-gradient-to-b from-brand-gold-light to-brand-gold text-brand-navy shadow-glow-gold hover:brightness-[1.06] hover:-translate-y-px",
+          "bg-gradient-to-r from-emerald-600 to-blue-600 text-white shadow-glow-gold hover:from-emerald-500 hover:to-blue-500 hover:-translate-y-px",
         glass:
           "glass text-foreground hover:bg-white/[0.08] hover:border-white/20 shadow-soft-sm",
         outline:
@@ -22,7 +22,7 @@ const buttonVariants = cva(
         secondary:
           "bg-secondary text-secondary-foreground shadow-soft-sm hover:bg-secondary/70",
         ghost: "hover:bg-secondary/60",
-        link: "text-accent underline-offset-4 hover:underline",
+        link: "text-blue-600 underline-offset-4 hover:text-emerald-600 hover:underline",
         destructive:
           "bg-destructive text-destructive-foreground shadow-glow-red hover:brightness-[1.05]",
         success:

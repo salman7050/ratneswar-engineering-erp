@@ -9,11 +9,11 @@ export function DashboardShell({ children, brand }: { children: React.ReactNode;
   const [collapsed, setCollapsed] = React.useState(false);
 
   return (
-    <div className="flex h-dvh w-full overflow-hidden bg-[#f5f7fb]">
+    <div className="erp-shell relative flex h-dvh w-full overflow-hidden">
       <Sidebar collapsed={collapsed} onToggle={() => setCollapsed((c) => !c)} brand={brand} />
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="relative z-10 flex min-w-0 flex-1 flex-col py-3 pr-3 max-md:p-0">
         <Topbar brand={brand} />
-        <main className="flex-1 overflow-y-auto scrollbar-thin">{children}</main>
+        <main className="erp-main mt-3 flex-1 overflow-y-auto rounded-[24px] scrollbar-thin max-md:mt-0 max-md:rounded-none">{children}</main>
       </div>
       <AssistantLauncher />
     </div>

@@ -12,7 +12,16 @@ export default async function DashboardLayout({
   // Middleware already redirects signed-out visitors to /login; this is
   // the server-side belt-and-braces check that also resolves the app
   // user's role for RBAC-aware rendering (sidebar, permission hooks, etc).
-  const [user, company] = await Promise.all([requireUser(), getCompanySettings()]);
+  const user = await requireUser();
+  const company = await getCompanySettings().catch((error) => {
+    console.error("[dashboard:company-settings] using safe brand fallback", error);
+    return {
+      tradeName: "Ratneswar Engineering",
+      legalName: "Ratneswar Engineering",
+      tagline: "Secure business operations workspace",
+      logoUrl: null,
+    };
+  });
 
   return (
     <UserProvider user={user}>
