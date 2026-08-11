@@ -21,7 +21,8 @@ const TYPE_LABEL: Record<string, string> = {
 
 export default async function SitesPage() {
   await requirePermission("sites", "view");
-  const [sites, masters] = await Promise.all([getSites(), getSiteMasterOptions()]);
+  const sites = await getSites();
+  const masters = await getSiteMasterOptions();
 
   return (
     <div className="mx-auto flex max-w-[1400px] flex-col gap-6 px-4 py-6 md:px-8">

@@ -1,20 +1,21 @@
 import "server-only";
 import { prisma } from "@/lib/prisma";
 import { resolveStoredFileUrls } from "@/lib/supabase/storage-server";
+import { withDatabaseRetry } from "@/lib/db-retry";
 
 export async function getSites() {
-  return prisma.site.findMany({
+  return withDatabaseRetry(() => prisma.site.findMany({
     orderBy: { createdAt: "desc" },
     include: {
       clientAccount: { select: { id: true, name: true } },
       subcontractor: { select: { id: true, name: true } },
-      _count: { select: { employees: true, tenders: true, invoices: true, assets: true, billingContracts: true } },
+      _count: { select: { employees: true, tenders: true, assets: true } },
     },
-  });
+  }), "sites-list");
 }
 
 export async function getSiteDetail(id: string) {
-  const site = await prisma.site.findUnique({
+  const site = await withDatabaseRetry(() => prisma.site.findUnique({
     where: { id },
     include: {
       clientAccount: true,
@@ -37,7 +38,7 @@ export async function getSiteDetail(id: string) {
       inventory: { orderBy: { name: "asc" } },
       assets: { orderBy: { name: "asc" } },
     },
-  });
+  }), "site-detail");
 
   if (!site) return null;
 
@@ -84,11 +85,11 @@ export async function getSiteDetail(id: string) {
 }
 
 export async function getAssignableUsers() {
-  return prisma.user.findMany({
+  return withDatabaseRetry(() => prisma.user.findMany({
     where: { isActive: true, role: { in: ["ADMIN", "OWNER"] } },
     select: { id: true, name: true, role: true },
     orderBy: { name: "asc" },
-  });
+  }), "site-assignable-users");
 }
 
 export type SiteDetail = NonNullable<Awaited<ReturnType<typeof getSiteDetail>>>;
@@ -96,9 +97,15 @@ export type SiteListItem = Awaited<ReturnType<typeof getSites>>[number];
 
 
 export async function getSiteMasterOptions() {
-  const [clients, subcontractors] = await Promise.all([
-    prisma.client.findMany({ where: { isActive: true }, orderBy: { name: "asc" }, select: { id: true, name: true } }),
-    prisma.subcontractor.findMany({ where: { isActive: true }, orderBy: { name: "asc" }, select: { id: true, name: true } }),
-  ]);
+  // Keep these sequential: Netlify runtime intentionally uses Prisma
+  // connection_limit=1 with Supabase Transaction Pooler.
+  const clients = await withDatabaseRetry(
+    () => prisma.client.findMany({ where: { isActive: true }, orderBy: { name: "asc" }, select: { id: true, name: true } }),
+    "site-client-options"
+  );
+  const subcontractors = await withDatabaseRetry(
+    () => prisma.subcontractor.findMany({ where: { isActive: true }, orderBy: { name: "asc" }, select: { id: true, name: true } }),
+    "site-subcontractor-options"
+  );
   return { clients, subcontractors };
 }
