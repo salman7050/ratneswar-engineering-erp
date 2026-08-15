@@ -69,8 +69,7 @@ export async function createSalaryMonthlyRecord(input: z.input<typeof createSche
   const totalManpowerCost = employeeGross + cashLabourGross;
 
   const distributions = [] as Array<{ label: string; type: "EMPLOYEE_SALARY" | "CASH_LABOUR" | "OTHER"; grossAmount: number; netPaid: number; isCash: boolean; sortOrder: number; siteId: string | null }>;
-  for (let index = 0; index < parsed.data.distributions.length; index++) {
-    const row = parsed.data.distributions[index];
+  for (const [index, row] of parsed.data.distributions.entries()) {
     distributions.push({ label: row.label, type: row.type, grossAmount: row.grossAmount, netPaid: row.netPaid, isCash: row.isCash, sortOrder: index, siteId: await matchSiteId(row.siteHint) });
   }
 

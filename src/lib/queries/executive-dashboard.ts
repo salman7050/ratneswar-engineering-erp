@@ -41,7 +41,12 @@ export async function getExecutiveDashboardData() {
   }
   for (const row of monthlyRevenueRows) { const k = `${row.date.getFullYear()}-${row.date.getMonth()}`; if (revenueMap.has(k)) revenueMap.set(k, (revenueMap.get(k) ?? 0) + money(row.grandTotal)); }
   for (const row of monthlyExpenseRows) { const k = `${row.date.getFullYear()}-${row.date.getMonth()}`; if (expenseMap.has(k)) expenseMap.set(k, (expenseMap.get(k) ?? 0) + money(row.amount)); }
-  const chart = labels.map((key) => { const [year, m] = key.split("-").map(Number); return { month: new Date(year, m, 1).toLocaleDateString("en-IN", { month: "short" }), revenue: Math.round((revenueMap.get(key) ?? 0) / 1000), expenses: Math.round((expenseMap.get(key) ?? 0) / 1000) }; });
+  const chart = labels.map((key) => {
+    const [yearText, monthText] = key.split("-");
+    const year = Number(yearText);
+    const month = Number(monthText);
+    return { month: new Date(year, month, 1).toLocaleDateString("en-IN", { month: "short" }), revenue: Math.round((revenueMap.get(key) ?? 0) / 1000), expenses: Math.round((expenseMap.get(key) ?? 0) / 1000) };
+  });
 
   const outstanding = pendingInvoices.reduce((sum, inv) => sum + money(inv.grandTotal) - inv.payments.reduce((s, p) => s + money(p.amount), 0), 0);
   const thisMonthRevenue = monthlyRevenueRows.filter((r) => r.date >= monthStart).reduce((s, r) => s + money(r.grandTotal), 0);

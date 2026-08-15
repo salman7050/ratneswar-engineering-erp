@@ -16,15 +16,17 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 export const dynamic = "force-dynamic";
 
-export async function generateMetadata({ params }: { params: { id: string } }) {
-  const site = await getSiteDetail(params.id);
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const site = await getSiteDetail(id);
   return { title: site ? `${site.name} · Ratneswar ERP` : "Site · Ratneswar ERP" };
 }
 
-export default async function SiteDetailPage({ params }: { params: { id: string } }) {
+export default async function SiteDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   await requirePermission("sites", "view");
   const [site, assignableUsers, masters] = await Promise.all([
-    getSiteDetail(params.id),
+    getSiteDetail(id),
     getAssignableUsers(),
     getSiteMasterOptions(),
   ]);

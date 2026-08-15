@@ -19,13 +19,14 @@ function isoDate(d: Date) {
   return `${y}-${m}-${day}`;
 }
 
-export default async function ExpensesPage({ searchParams }: { searchParams?: { from?: string; to?: string } }) {
+export default async function ExpensesPage({ searchParams }: { searchParams?: Promise<{ from?: string; to?: string }> }) {
+  const filters = await searchParams;
   const user = await requirePermission("expenses", "view");
   const now = new Date();
   const defaultFrom = new Date(now.getFullYear(), now.getMonth(), 1);
   const defaultTo = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
-  const from = safeDate(searchParams?.from, defaultFrom);
-  const toInput = safeDate(searchParams?.to, defaultTo);
+  const from = safeDate(filters?.from, defaultFrom);
+  const toInput = safeDate(filters?.to, defaultTo);
   const to = new Date(toInput.getFullYear(), toInput.getMonth(), toInput.getDate(), 23, 59, 59, 999);
 
   const [expenses, salaryCosts, sites, vendors, purchaseOrders] = await Promise.all([

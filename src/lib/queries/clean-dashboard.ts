@@ -24,23 +24,20 @@ export async function getCleanDashboardData(user: AppUser) {
   const { key, start, end } = indiaDayRange();
   const thirtyDaysAgo = new Date(start.getTime() - 30 * 86_400_000);
 
-  const [
-    todayTasks,
-    pendingWorks,
-    activeSites,
-    recentSites,
-    recentInvoices,
-    recentExpenses,
-    recentPOs,
-    siteOptions,
-    teamOptions,
-  ] = await withDatabaseRetry(() => Promise.all([
-    prisma.task.findMany({
+  // Supabase Transaction Pooler is configured with connection_limit=1 in
+  // production. Keep dashboard reads sequential so one request cannot exhaust
+  // its own Prisma pool while rendering the page.
+  const todayTasks = await withDatabaseRetry(
+    () => prisma.task.findMany({
       where: { assignedToId: user.id, dueDate: { gte: start, lt: end } },
       include: { site: { select: { id: true, name: true } }, _count: { select: { comments: true } } },
       orderBy: [{ status: "asc" }, { dueTime: "asc" }, { priority: "desc" }],
     }),
-    prisma.task.findMany({
+    "dashboard-today-tasks"
+  );
+
+  const pendingWorks = await withDatabaseRetry(
+    () => prisma.task.findMany({
       where: {
         assignedToId: user.id,
         status: { in: [...OPEN] },
@@ -50,20 +47,31 @@ export async function getCleanDashboardData(user: AppUser) {
       orderBy: [{ dueDate: "asc" }, { priority: "desc" }],
       take: 12,
     }),
-    prisma.site.count({ where: { status: "ACTIVE" } }),
-    prisma.site.findMany({
+    "dashboard-pending-tasks"
+  );
+
+  // One site query supplies the count, recent-site cards and task form options.
+  const activeSiteRows = await withDatabaseRetry(
+    () => prisma.site.findMany({
       where: { status: "ACTIVE" },
       select: { id: true, name: true, capacity: true, type: true, updatedAt: true },
       orderBy: { updatedAt: "desc" },
-      take: 6,
     }),
-    prisma.invoice.findMany({
+    "dashboard-active-sites"
+  );
+
+  const recentInvoices = await withDatabaseRetry(
+    () => prisma.invoice.findMany({
       where: { createdAt: { gte: thirtyDaysAgo } },
       select: { id: true, invoiceNo: true, status: true, date: true, buyerName: true, site: { select: { name: true } } },
       orderBy: { createdAt: "desc" },
       take: 5,
     }),
-    prisma.expense.findMany({
+    "dashboard-recent-invoices"
+  );
+
+  const recentExpenses = await withDatabaseRetry(
+    () => prisma.expense.findMany({
       where: { createdAt: { gte: thirtyDaysAgo } },
       select: {
         id: true,
@@ -79,27 +87,33 @@ export async function getCleanDashboardData(user: AppUser) {
       orderBy: { createdAt: "desc" },
       take: 5,
     }),
-    prisma.purchaseOrder.findMany({
+    "dashboard-recent-expenses"
+  );
+
+  const openPurchaseOrders = await withDatabaseRetry(
+    () => prisma.purchaseOrder.count({
       where: { status: { in: ["DRAFT", "PENDING_APPROVAL", "APPROVED", "ISSUED", "PARTIALLY_RECEIVED"] } },
-      select: { id: true, poNo: true, vendorName: true, status: true, date: true, site: { select: { name: true } } },
-      orderBy: { updatedAt: "desc" },
-      take: 5,
     }),
-    prisma.site.findMany({
-      where: { status: "ACTIVE" },
-      select: { id: true, name: true },
-      orderBy: { name: "asc" },
-    }),
-    prisma.user.findMany({
+    "dashboard-open-purchase-orders"
+  );
+
+  const teamOptions = await withDatabaseRetry(
+    () => prisma.user.findMany({
       where: { isActive: true, role: { in: ["OWNER", "ADMIN"] } },
       select: { id: true, name: true },
       orderBy: { name: "asc" },
     }),
-  ]), "dashboard-data");
+    "dashboard-team-options"
+  );
+
+  const activeSites = activeSiteRows.length;
+  const recentSites = activeSiteRows.slice(0, 6);
+  const siteOptions = activeSiteRows
+    .map(({ id, name }) => ({ id, name }))
+    .sort((a, b) => a.name.localeCompare(b.name));
 
   const completedToday = todayTasks.filter((task) => task.status === "COMPLETED").length;
   const openToday = todayTasks.filter((task) => OPEN.includes(task.status as (typeof OPEN)[number])).length;
-  const pendingPOCount = recentPOs.filter((po) => !["COMPLETED", "CANCELLED", "REJECTED"].includes(po.status)).length;
 
   return {
     indiaDateKey: key,
@@ -109,7 +123,6 @@ export async function getCleanDashboardData(user: AppUser) {
     recentSites,
     recentInvoices,
     recentExpenses,
-    recentPOs,
     siteOptions,
     teamOptions,
     counts: {
@@ -119,7 +132,7 @@ export async function getCleanDashboardData(user: AppUser) {
       pendingWorks: pendingWorks.length,
       activeSites,
       recentInvoices: recentInvoices.length,
-      openPurchaseOrders: pendingPOCount,
+      openPurchaseOrders,
     },
   };
 }

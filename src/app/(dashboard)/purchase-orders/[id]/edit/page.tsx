@@ -9,10 +9,11 @@ import { H1, Muted } from "@/components/ui/typography";
 
 export const dynamic = "force-dynamic";
 
-export default async function EditPurchaseOrderPage({ params }: { params: { id: string } }) {
+export default async function EditPurchaseOrderPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   await requirePermission("purchase_orders", "edit");
   const [po, sites, vendors, bankAccounts, signatures, company] = await Promise.all([
-    getPurchaseOrderDetail(params.id),
+    getPurchaseOrderDetail(id),
     getSiteOptions(),
     getVendorOptions(),
     getBankAccounts(),

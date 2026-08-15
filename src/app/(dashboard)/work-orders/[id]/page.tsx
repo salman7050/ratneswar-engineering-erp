@@ -8,16 +8,18 @@ import { WorkOrderDetailClient } from "@/components/finance/work-order-detail-cl
 
 export const dynamic = "force-dynamic";
 
-export async function generateMetadata({ params }: { params: { id: string } }) {
-  const wo = await getWorkOrderDetail(params.id);
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const wo = await getWorkOrderDetail(id);
   return { title: wo ? `${wo.woNo} · Ratneswar ERP` : "Work Order · Ratneswar ERP" };
 }
 
-export default async function WorkOrderDetailPage({ params }: { params: { id: string } }) {
+export default async function WorkOrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   await requirePermission("invoices", "view");
   const [wo, sites, company, history, suggestedNo] = await Promise.all([
-    getWorkOrderDetail(params.id), getSites(), getCompanySettings(),
-    getEntityHistory("WorkOrder", params.id), suggestNextWONumber(),
+    getWorkOrderDetail(id), getSites(), getCompanySettings(),
+    getEntityHistory("WorkOrder", id), suggestNextWONumber(),
   ]);
 
   if (!wo) notFound();

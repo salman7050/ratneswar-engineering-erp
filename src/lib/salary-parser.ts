@@ -75,6 +75,7 @@ export async function parseSalaryWorkbook(file: File): Promise<ParsedSalaryWorkb
   const salarySheet = workbook.SheetNames.find((name) => /SALARY/i.test(name) && !/BANK|RULE/i.test(name)) ?? workbook.SheetNames[0];
   if (!salarySheet) throw new Error("No worksheet found in this Excel file.");
   const sheet = workbook.Sheets[salarySheet];
+  if (!sheet) throw new Error("The selected salary worksheet could not be read.");
   const rows = XLSX.utils.sheet_to_json<unknown[]>(sheet, { header: 1, defval: null, raw: true });
 
   const sampleText = [salarySheet, ...rows.slice(0, 12).flat().filter((v) => typeof v === "string")].join(" ");
@@ -138,9 +139,13 @@ export async function parseBankBulkTotal(file: File): Promise<number> {
   const workbook = XLSX.read(await file.arrayBuffer(), { type: "array", cellDates: true });
   let best = 0;
   for (const name of workbook.SheetNames) {
-    const rows = XLSX.utils.sheet_to_json<unknown[]>(workbook.Sheets[name], { header: 1, defval: null, raw: true });
+    const sheet = workbook.Sheets[name];
+    if (!sheet) continue;
+    const rows = XLSX.utils.sheet_to_json<unknown[]>(sheet, { header: 1, defval: null, raw: true });
     for (let r = 0; r < Math.min(rows.length, 25); r++) {
-      const header = rows[r].map((v) => String(v ?? "").toUpperCase().trim());
+      const row = rows[r];
+      if (!row) continue;
+      const header = row.map((v) => String(v ?? "").toUpperCase().trim());
       const amountCol = header.findIndex((v) => v === "AMOUNT" || v.includes("TRANSFER AMOUNT") || v.includes("SALARY AMOUNT"));
       if (amountCol < 0) continue;
       let total = 0;

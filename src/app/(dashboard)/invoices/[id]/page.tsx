@@ -19,16 +19,18 @@ export const dynamic = "force-dynamic";
 
 const STATUS_VARIANT = { DRAFT: "outline", GENERATED: "info", PAID: "success", OVERDUE: "destructive" } as const;
 
-export async function generateMetadata({ params }: { params: { id: string } }) {
-  const invoice = await getInvoiceDetail(params.id);
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const invoice = await getInvoiceDetail(id);
   return { title: invoice ? `${invoice.invoiceNo} · Ratneswar ERP` : "Invoice · Ratneswar ERP" };
 }
 
-export default async function InvoiceDetailPage({ params }: { params: { id: string } }) {
+export default async function InvoiceDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   await requirePermission("invoices", "view");
   const [invoice, sites, bankAccounts, company, history, suggestedNo, masters, signatures] = await Promise.all([
-    getInvoiceDetail(params.id), getSites(), getBankAccounts(), getCompanySettings(),
-    getEntityHistory("Invoice", params.id), suggestNextInvoiceNumber(), getInvoiceMasterOptions(), getSignatureAssets(),
+    getInvoiceDetail(id), getSites(), getBankAccounts(), getCompanySettings(),
+    getEntityHistory("Invoice", id), suggestNextInvoiceNumber(), getInvoiceMasterOptions(), getSignatureAssets(),
   ]);
 
   if (!invoice) notFound();

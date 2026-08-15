@@ -153,7 +153,12 @@ export async function updateBillingContract(id: string, input: z.infer<typeof co
 }
 
 function monthRange(month: string, cycleStartDay = 1) {
-  const [year, monthNumber] = month.split("-").map(Number);
+  const [yearText, monthText] = month.split("-");
+  const year = Number(yearText);
+  const monthNumber = Number(monthText);
+  if (!Number.isInteger(year) || !Number.isInteger(monthNumber) || monthNumber < 1 || monthNumber > 12) {
+    throw new Error("Billing month must use YYYY-MM format.");
+  }
   const pad = (value: number) => String(value).padStart(2, "0");
   const nextMonthDate = new Date(Date.UTC(year, monthNumber, 1));
   const nextYear = nextMonthDate.getUTCFullYear();

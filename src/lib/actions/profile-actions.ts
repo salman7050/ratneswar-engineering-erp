@@ -23,7 +23,7 @@ export async function updateOwnProfile(input: z.infer<typeof profileSchema>) {
     data: { name: parsed.data.name, phone: parsed.data.phone || null },
   });
 
-  const supabase = createClient();
+  const supabase = await createClient();
   await supabase.auth.updateUser({ data: { name: parsed.data.name } });
   revalidatePath("/profile");
   revalidatePath("/dashboard", "layout");
@@ -36,7 +36,7 @@ export async function changeOwnPassword(password: string) {
   const parsed = z.string().min(8).max(72).safeParse(password);
   if (!parsed.success) return fail("Password must be at least 8 characters.");
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error } = await supabase.auth.updateUser({ password: parsed.data });
   if (error) return fail(error.message);
   return ok(undefined);

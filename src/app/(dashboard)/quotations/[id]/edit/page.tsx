@@ -7,10 +7,11 @@ import { SmartQuotationEditor } from "@/components/quotations/smart-quotation-ed
 
 export const dynamic = "force-dynamic";
 
-export default async function EditQuotationPage({ params }: { params: { id: string } }) {
+export default async function EditQuotationPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const user = await requirePermission("quotations", "edit");
   const [quotation, clients, sites, bankAccounts, company, signatures] = await Promise.all([
-    getQuotationDetail(params.id), getQuotationMasterOptions(), getSites(), getBankAccounts(), getCompanySettings(), getSignatureAssets(),
+    getQuotationDetail(id), getQuotationMasterOptions(), getSites(), getBankAccounts(), getCompanySettings(), getSignatureAssets(),
   ]);
   if (!quotation) notFound();
   return <SmartQuotationEditor quotation={quotation} clients={clients} sites={sites} bankAccounts={bankAccounts} canUseAI={user.role === "ADMIN" || user.role === "OWNER"} defaultTerms={company.defaultQuoteTerms} defaultValidityDays={company.quotationValidityDays} signatures={signatures} />;

@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
@@ -27,7 +28,7 @@ function serializeUser(appUser: {
 }
 
 export async function getCurrentUser(): Promise<AppUser | null> {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user: authUser } } = await supabase.auth.getUser();
   if (!authUser) return null;
 
@@ -39,9 +40,13 @@ export async function getCurrentUser(): Promise<AppUser | null> {
   return serializeUser(appUser);
 }
 
-/** Distinguishes signed-out users from disabled/missing ERP profiles to avoid redirect loops. */
-export async function requireUser(): Promise<AppUser> {
-  const supabase = createClient();
+/**
+ * Distinguishes signed-out users from disabled/missing ERP profiles. React's
+ * request cache also prevents the dashboard layout and page from repeating the
+ * same Supabase + Prisma lookup during one render.
+ */
+const resolveRequiredUser = cache(async (): Promise<AppUser> => {
+  const supabase = await createClient();
   const { data: { user: authUser } } = await supabase.auth.getUser();
   if (!authUser) redirect("/login");
 
@@ -51,6 +56,10 @@ export async function requireUser(): Promise<AppUser> {
   );
   if (!appUser || !appUser.isActive || !["ADMIN", "OWNER"].includes(appUser.role)) redirect("/account-disabled");
   return serializeUser(appUser);
+});
+
+export async function requireUser(): Promise<AppUser> {
+  return resolveRequiredUser();
 }
 
 export async function requirePermission(module: Module, permission: Permission): Promise<AppUser> {

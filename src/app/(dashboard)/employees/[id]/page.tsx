@@ -15,15 +15,17 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 export const dynamic = "force-dynamic";
 
-export async function generateMetadata({ params }: { params: { id: string } }) {
-  const employee = await getEmployeeDetail(params.id);
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const employee = await getEmployeeDetail(id);
   return { title: employee ? `${employee.name} · Ratneswar ERP` : "Employee · Ratneswar ERP" };
 }
 
-export default async function EmployeeDetailPage({ params }: { params: { id: string } }) {
+export default async function EmployeeDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   await requirePermission("employees", "view");
   const [employee, sites] = await Promise.all([
-    getEmployeeDetail(params.id),
+    getEmployeeDetail(id),
     getSitesForAssignment(),
   ]);
 

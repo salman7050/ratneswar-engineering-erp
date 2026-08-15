@@ -9,15 +9,17 @@ import { PODetailView } from "@/components/purchase-orders/po-detail-view";
 
 export const dynamic = "force-dynamic";
 
-export async function generateMetadata({ params }: { params: { id: string } }) {
-  const po = await getPurchaseOrderDetail(params.id);
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const po = await getPurchaseOrderDetail(id);
   return { title: po ? `${po.poNo} · Ratneswar ERP` : "Purchase Order · Ratneswar ERP" };
 }
 
-export default async function PurchaseOrderDetailPage({ params }: { params: { id: string } }) {
+export default async function PurchaseOrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const user = await requirePermission("purchase_orders", "view");
   const [po, pos, company] = await Promise.all([
-    getPurchaseOrderDetail(params.id),
+    getPurchaseOrderDetail(id),
     getPurchaseOrders(),
     getCompanySettings(),
   ]);

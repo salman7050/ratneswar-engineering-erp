@@ -13,15 +13,17 @@ import { TableContainer, Table, TableHeader, TableBody, TableRow, TableHead, Tab
 
 export const dynamic = "force-dynamic";
 
-export async function generateMetadata({ params }: { params: { id: string } }) {
-  const item = await getStockItemDetail(params.id);
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const item = await getStockItemDetail(id);
   return { title: item ? `${item.name} · Ratneswar ERP` : "Material · Ratneswar ERP" };
 }
 
-export default async function StockItemDetailPage({ params }: { params: { id: string } }) {
+export default async function StockItemDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   await requirePermission("inventory", "view");
   const [item, vendors, stores] = await Promise.all([
-    getStockItemDetail(params.id), getVendors(), getStores(),
+    getStockItemDetail(id), getVendors(), getStores(),
   ]);
 
   if (!item) notFound();

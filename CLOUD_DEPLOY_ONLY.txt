@@ -1,9 +1,9 @@
 RATNESWAR ENGINEERING ERP — CLOUD V8
 ===================================
 
-FINAL ARCHITECTURE
+FINAL ARCHITECTURE — CLOUDFLARE EDITION
 ------------------
-1) App hosting: Netlify cloud (Next.js)
+1) App hosting: Cloudflare Workers (Next.js through OpenNext)
 2) Database/Auth/Files: Supabase cloud
 3) AI: Cloudflare Workers AI cloud
 4) Owner/Admin use only a browser/mobile browser.
@@ -24,15 +24,16 @@ There is no public sign-up screen. New users are created from Users inside the E
 DEPLOYMENT — NO LOCAL RUNTIME
 -----------------------------
 A) Put this source code in a GitHub repository.
-B) In Netlify: Add new project -> Import from Git -> choose the repository.
-C) Add every value from .env.cloud.example under Netlify -> Project configuration -> Environment variables.
-D) Deploy. Netlify runs database migrations and production build in its cloud build environment.
-E) In Supabase Auth -> URL Configuration, set Site URL to the Netlify production URL and add the reset/callback URLs.
-F) After first deploy, set NEXT_PUBLIC_APP_URL to the final Netlify URL and redeploy.
+B) In Cloudflare: Workers & Pages -> Import from Git -> choose the repository.
+C) Use build command `npm run cf:build` and deploy command `npx wrangler deploy`.
+D) Add every value from .env.cloud.example under Cloudflare Build Variables and Secrets.
+E) Deploy. Cloudflare runs database migrations, the production build and the Worker deployment.
+F) In Supabase Auth -> URL Configuration, set Site URL to the Cloudflare Workers production URL and add `https://YOUR-WORKERS-URL/**`.
+G) After first deploy, set NEXT_PUBLIC_APP_URL to the final Cloudflare Workers URL and redeploy.
 
 CLOUDFLARE AI
 -------------
-Create a Cloudflare API token that can run Workers AI for your account. Put only the token/account ID in Netlify environment variables.
+Create a Cloudflare API token that can run Workers AI for your account. Put only the token/account ID in Cloudflare secrets.
 The browser never receives this secret.
 
 IMPORTANT

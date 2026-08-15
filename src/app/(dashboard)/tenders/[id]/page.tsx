@@ -23,16 +23,18 @@ const STATUS_VARIANT = {
   PREPARING: "outline", SUBMITTED: "info", WON: "success", LOST: "destructive", CANCELLED: "secondary", COMPLETED: "gold",
 } as const;
 
-export async function generateMetadata({ params }: { params: { id: string } }) {
-  const tender = await getTenderDetail(params.id);
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const tender = await getTenderDetail(id);
   return { title: tender ? `${tender.tenderNo} · Ratneswar ERP` : "Tender · Ratneswar ERP" };
 }
 
-export default async function TenderDetailPage({ params }: { params: { id: string } }) {
+export default async function TenderDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   await requirePermission("tenders", "view");
   const [tender, sites, owners, bankAccounts, history, suggestedTenderNo, suggestedQuoteNo] = await Promise.all([
-    getTenderDetail(params.id), getSites(), getAssignableUsers(), getBankAccounts(),
-    getEntityHistory("Tender", params.id), suggestNextTenderNo(), suggestNextQuoteNumber(),
+    getTenderDetail(id), getSites(), getAssignableUsers(), getBankAccounts(),
+    getEntityHistory("Tender", id), suggestNextTenderNo(), suggestNextQuoteNumber(),
   ]);
 
   if (!tender) notFound();

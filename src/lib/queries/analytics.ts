@@ -5,7 +5,7 @@ import { toNum, bucketByMonth, groupAndSum } from "@/lib/analytics-utils";
 type DecimalLike = { toNumber: () => number };
 
 interface InvoiceRow { date: Date; grandTotal: DecimalLike | number; status: string; buyerName: string; siteId: string | null; site: { name: string } | null; }
-interface ExpenseRow { date: Date; amount: DecimalLike | number; category: string; siteId: string; site: { name: string } | null; }
+interface ExpenseRow { date: Date; amount: DecimalLike | number; category: string; siteId: string | null; site: { name: string } | null; }
 interface EmployeeRow { isActive: boolean; basic: DecimalLike | number; hra: DecimalLike | number; otherAllowance: DecimalLike | number; siteId: string | null; site: { name: string } | null; joinedAt: Date; }
 interface SalarySlipRow { createdAt: Date; netPay: DecimalLike | number; }
 interface SiteRow { status: string; type: string; }
