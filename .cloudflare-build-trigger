@@ -1,0 +1,2 @@
+Cloudflare Workers build trigger.
+This file exists only to trigger a fresh deployment after build variables were configured.
