@@ -2,7 +2,7 @@
 
 Cloud-first Owner/Admin ERP for Ratneswar Engineering.
 
-## Runtime architecture
+## Runtime architecture 
 - **Netlify**: Next.js application hosting/builds.
 - **Supabase**: shared Postgres database, email/password authentication, private document storage.
 - **Cloudflare Workers AI**: Ratneswar AI in the cloud; no office-PC AI worker or Ollama runtime.
