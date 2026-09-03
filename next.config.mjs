@@ -23,6 +23,21 @@ const nextConfig = {
     },
     optimizePackageImports: ["lucide-react", "recharts", "framer-motion"],
   },
+  // Prisma 6 client-engine uses query_compiler_bg.wasm at runtime.
+  // Next/OpenNext file tracing does not always discover this generated WASM
+  // because it lives under node_modules/.prisma (a hidden directory).
+  // Force it into the traced Worker bundle so Cloudflare can load Prisma.
+  outputFileTracingIncludes: {
+    "/*": [
+      "./node_modules/.prisma/client/*.wasm",
+      "./node_modules/@prisma/client/runtime/*.wasm"
+    ]
+  },
+  serverExternalPackages: [
+    "@prisma/client",
+    "@prisma/adapter-pg",
+    "pg"
+  ],
   images: {
     remotePatterns: [
       {
