@@ -114,10 +114,22 @@ if (!migrationFiles.length) {
 } else {
   const migration = migrationFiles.map((file) => fs.readFileSync(file, "utf8")).join("\n");
   const modelCount = [...schema.matchAll(/^model\s+\w+\s*\{/gm)].length;
-  const tableCount = [...migration.matchAll(/^CREATE TABLE\s+/gm)].length;
+  const modelTables = new Set();
+  for (const match of schema.matchAll(/^model\s+(\w+)\s*\{([\s\S]*?)^\}/gm)) {
+    const mapped = match[2].match(/@@map\(\"([^\"]+)\"\)/);
+    modelTables.add(mapped ? mapped[1] : match[1]);
+  }
+  const tableMatches = [...migration.matchAll(/^CREATE TABLE(?:\s+IF NOT EXISTS)?\s+(?:public\.)?(?:\"?([A-Za-z0-9_]+)\"?)/gm)];
+  const migrationTables = tableMatches.map((match) => match[1]);
+  const sqlOnlyTables = new Set(["erp_sync_events"]);
+  const unexpectedTables = migrationTables.filter((table) => !modelTables.has(table) && !sqlOnlyTables.has(table));
+  const missingTables = [...modelTables].filter((table) => !migrationTables.includes(table));
   const enumCount = [...schema.matchAll(/^enum\s+\w+\s*\{/gm)].length;
   const typeCount = [...migration.matchAll(/^CREATE TYPE\s+/gm)].length;
-  if (modelCount !== tableCount) fail(`Migrations have ${tableCount} tables but schema has ${modelCount} models`);
+  if (unexpectedTables.length || missingTables.length) {
+    fail(`Migration/schema table mismatch. Unexpected SQL-only tables: ${unexpectedTables.join(', ') || 'none'}; missing model tables: ${missingTables.join(', ') || 'none'}`);
+  }
+  if (modelCount !== migrationTables.filter((table) => modelTables.has(table)).length) fail(`Migrations have ${migrationTables.length} tables (${sqlOnlyTables.size} allowed SQL-only table) but schema has ${modelCount} models`);
   if (enumCount !== typeCount) fail(`Migrations have ${typeCount} enum types but schema has ${enumCount} enums`);
   if (/,[\s\n]*\);/m.test(migration)) fail("A migration contains a trailing comma before a closing table parenthesis");
 }

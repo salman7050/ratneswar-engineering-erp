@@ -1,0 +1,12 @@
+RATNESWAR ENGINEERING ERP - DEPLOY THIS VERSION
+
+1. This folder contains the Cloudflare/OpenNext deployment files.
+2. It intentionally excludes the private .env file. Keep your secrets in Cloudflare Build Variables and Secrets.
+3. If this folder is your Git working copy, run PUSH_CLOUDFLARE_FIX.bat once. It commits the current working tree and pushes main.
+4. In Cloudflare Workers, import the same GitHub repository. Application/root directory: /
+5. Build command: npm run cf:build
+6. Deploy command: npx wrangler deploy
+7. Add all variables listed in .env.cloud.example as Cloudflare Build Variables and Secrets.
+8. After the Worker URL is available, set NEXT_PUBLIC_APP_URL to that exact URL and update Supabase Authentication URL Configuration.
+9. Do not use a raw source ZIP as a Cloudflare Pages static upload. This is a Next.js Worker deployment and must go through the OpenNext build.
+10. Do not add `prisma migrate deploy` back into `cf:build`. Run `npm run db:deploy` separately only when database migrations are intentionally required.

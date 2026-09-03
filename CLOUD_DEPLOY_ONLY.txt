@@ -25,9 +25,9 @@ DEPLOYMENT — NO LOCAL RUNTIME
 -----------------------------
 A) Put this source code in a GitHub repository.
 B) In Cloudflare: Workers & Pages -> Import from Git -> choose the repository.
-C) Use build command `npm run cf:build` and deploy command `npx wrangler deploy`.
+C) Use build command `npm run cf:build` and deploy command `npx wrangler deploy`. Do NOT use a Pages static upload for this Next.js app; it must be built as a Cloudflare Worker through OpenNext.
 D) Add every value from .env.cloud.example under Cloudflare Build Variables and Secrets.
-E) Deploy. Cloudflare runs database migrations, the production build and the Worker deployment.
+E) Deploy. Cloudflare runs Prisma client generation, the production build and the Worker deployment. The application build does not run `prisma migrate deploy`; run `npm run db:deploy` separately only when you intentionally want to apply pending database migrations.
 F) In Supabase Auth -> URL Configuration, set Site URL to the Cloudflare Workers production URL and add `https://YOUR-WORKERS-URL/**`.
 G) After first deploy, set NEXT_PUBLIC_APP_URL to the final Cloudflare Workers URL and redeploy.
 

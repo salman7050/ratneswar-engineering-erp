@@ -2,9 +2,9 @@
 
 This build is prepared for Cloudflare Workers with OpenNext. Supabase remains the shared database, authentication and private-file service, so existing business data is not moved or deleted.
 
-## Recommended plan
+## Plan note
 
-Use **Cloudflare Workers Paid**. The minimum is about USD 5/month. The free Worker has a 10 ms CPU limit and a 3 MB compressed bundle limit, which is too tight for a secure server-rendered ERP with Prisma.
+This project is configured for Cloudflare Workers through OpenNext. The explicit CPU override has been removed so the configuration is not tied to a paid-plan setting. The full ERP may still require a paid Workers plan if free runtime/request limits are exceeded.
 
 ## 1. Push this project to GitHub
 
