@@ -6,13 +6,39 @@ import type { CompanyInfo } from "@/components/finance/document-print-view";
 const money = (value: number) => value.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const lines = (value?: string | null) => (value || "").split(/\r?\n/).map((v) => v.trim()).filter(Boolean);
 
-export function OfficialQuotationPrint({ quotation, company }: { quotation: QuotationDetail; company: CompanyInfo }) {
-  const hasSecondary = quotation.items.some((item) => item.secondaryQuantity != null);
-  const primaryHeader = hasSecondary ? (quotation.items.find((item) => item.secondaryQuantity != null)?.unit || "Qty") : "Quantity";
-  const secondaryHeader = quotation.items.find((item) => item.secondaryQuantity != null)?.secondaryUnit || "Qty 2";
-  const pageSize = quotation.items.length <= 7 ? 7 : 6;
+function paginateItems(quotation: QuotationDetail) {
+  const items = quotation.items;
+  if (!items.length) return [[] as typeof quotation.items];
+
+  const supportText = (quotation.notes?.length || 0) + (quotation.terms?.length || 0) + (quotation.introduction?.length || 0);
+  const hasLongItem = items.some((item) => item.description.length > 170);
+  const onePageCapacity = hasLongItem ? 3 : supportText > 1050 ? 4 : 6;
+  if (items.length <= onePageCapacity) return [items];
+
+  const normalCapacity = hasLongItem ? 6 : 10;
+  const finalCapacity = supportText > 1250 ? 3 : supportText > 750 ? 4 : 5;
   const pages: Array<typeof quotation.items> = [];
-  for (let i = 0; i < quotation.items.length; i += pageSize) pages.push(quotation.items.slice(i, i + pageSize));
+  let index = 0;
+  while (items.length - index > finalCapacity) {
+    const remaining = items.length - index;
+    const take = Math.min(normalCapacity, Math.max(1, remaining - finalCapacity));
+    pages.push(items.slice(index, index + take));
+    index += take;
+  }
+  pages.push(items.slice(index));
+  return pages;
+}
+
+function closingFor(quotation: QuotationDetail) {
+  const text = `${quotation.subject} ${quotation.scope}`.toLowerCase();
+  if (/techno|supply|material|equipment|transformer|panel|cable|transport/.test(text)) {
+    return "We assure you of professional coordination, quality supply and best service. Kindly consider our offer favourably and release the Purchase Order at the earliest.";
+  }
+  return "We assure quality execution and professional service. Kindly consider our offer favourably and issue the Purchase Order at the earliest.";
+}
+
+export function OfficialQuotationPrint({ quotation, company }: { quotation: QuotationDetail; company: CompanyInfo }) {
+  const pages = paginateItems(quotation);
   const cgst = quotation.gstType === "SGST_CGST" ? quotation.taxAmount / 2 : 0;
   const sgst = quotation.gstType === "SGST_CGST" ? quotation.taxAmount / 2 : 0;
   const igst = quotation.gstType === "IGST" ? quotation.taxAmount : 0;
@@ -20,53 +46,92 @@ export function OfficialQuotationPrint({ quotation, company }: { quotation: Quot
   const termLines = lines(quotation.terms);
   const pending = quotation.approvalStatus === "PENDING" || quotation.approvalStatus === "REJECTED";
 
-  return <div id="print-doc" className="ratneswar-quotation-wrap text-black">
+  return <div id="print-doc" className="ratneswar-quotation-wrap rq2-wrap text-black">
     {pages.map((items, pageIndex) => {
+      const isFirst = pageIndex === 0;
       const isLast = pageIndex === pages.length - 1;
-      const itemStart = pageIndex * pageSize;
-      return <section className="ratneswar-quotation-page" key={pageIndex}>
-        <QuotationLetterhead company={company} />
-        <div className="rq-watermark" aria-hidden="true">{/* eslint-disable-next-line @next/next/no-img-element */}<img src="/brand/ratneswar-logo.png" alt="" /></div>
-        {pending && <div className="rq-draft-watermark">{quotation.approvalStatus === "REJECTED" ? "REVISION REQUIRED" : "OWNER APPROVAL PENDING"}</div>}
+      const startIndex = pages.slice(0, pageIndex).reduce((sum, page) => sum + page.length, 0);
 
-        {pageIndex === 0 ? <>
-          <div className="rq-ref-row"><span>Ref No.: <b>{quotation.referenceNo}</b></span><span>Date: <b>{formatDate(quotation.date)}</b></span></div>
-          <div className="rq-to-block"><div>To,</div>{quotation.recipientDesignation && <b>{quotation.recipientDesignation}</b>}{quotation.recipientDepartment && <b>{quotation.recipientDepartment}</b>}<b>{quotation.client}</b>{quotation.clientAddress && <span>{quotation.clientAddress}</span>}</div>
-          <div className="rq-subject"><b>Subject:</b> {quotation.subject}</div>
-          <div className="rq-intro"><b>Dear Sir,</b><p>{quotation.introduction || `With reference to the requirement, we are pleased to submit our quotation for ${quotation.scope}. The details of the work and corresponding rates are as follows:`}</p></div>
-        </> : <div className="rq-ref-row rq-continuation"><span>Ref No.: <b>{quotation.referenceNo}</b></span><span>Page {pageIndex + 1} of {pages.length}</span></div>}
+      return <section className="ratneswar-quotation-page rq2-page" key={pageIndex}>
+        {/* Exact Ratneswar Engineering letterpad supplied by the user. */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img className="rq2-letterpad" src="/brand/ratneswar-letterpad-a4.png" alt="" aria-hidden="true" />
+        {pending && <div className="rq2-draft">{quotation.approvalStatus === "REJECTED" ? "REVISION REQUIRED" : "DRAFT - APPROVAL PENDING"}</div>}
 
-        <QuotationItemsTable items={items} startIndex={itemStart} hasSecondary={hasSecondary} primaryHeader={primaryHeader} secondaryHeader={secondaryHeader} />
-
-        {isLast && <div className="rq-final-block">
-          <div className="rq-totals">
-            <div><span>Sub Total:</span><b>₹ {money(quotation.taxableValue)}/-</b></div>
-            {quotation.gstType === "SGST_CGST" ? <><div><span>CGST (9%):</span><b>₹ {money(cgst)}/-</b></div><div><span>SGST (9%):</span><b>₹ {money(sgst)}/-</b></div></> : <div><span>IGST (18%):</span><b>₹ {money(igst)}/-</b></div>}
-            <div className="rq-grand"><span>Grand Total:</span><b>₹ {money(quotation.amount)}/-</b></div>
-            <div className="rq-words">(Rupees {amountInWords(quotation.amount).replace(/ Rupees Only$/, "")} Only)</div>
+        <main className="rq2-content">
+          <div className="rq2-docline">
+            <div><span>Ref:</span><b>{quotation.referenceNo}</b></div>
+            <div><span>Date:</span><b>{formatDate(quotation.date)}</b></div>
           </div>
 
-          {noteLines.length > 0 && <div className="rq-list"><b>Notes:</b><ol>{noteLines.map((line, i) => <li key={i}>{line}</li>)}</ol></div>}
-          {termLines.length > 0 && <div className="rq-list"><b>Terms & Conditions:</b><ol>{termLines.map((line, i) => <li key={i}>{line}</li>)}</ol></div>}
+          {isFirst ? <>
+            <div className="rq2-to-block">
+              <span>To,</span>
+              {quotation.recipientDesignation && <b>{quotation.recipientDesignation}</b>}
+              {quotation.recipientDepartment && <b>{quotation.recipientDepartment}</b>}
+              <b>{quotation.client}</b>
+              {quotation.clientAddress && <span>{quotation.clientAddress}</span>}
+              {quotation.clientGstin && <span>GST No: {quotation.clientGstin}</span>}
+            </div>
 
-          <div className="rq-closing"><p>We assure you of quality workmanship, timely execution, and adherence to applicable safety standards.</p><p>We look forward to your approval and the opportunity to execute the work.</p><p className="rq-thanks">Thanking you,<br/>Yours faithfully,<br/><b>For {company.legalName}</b></p></div>
-          <div className="rq-signature">{quotation.includeSignature && quotation.signaturePreviewUrl ? <>{/* eslint-disable-next-line @next/next/no-img-element */}<img src={quotation.signaturePreviewUrl} alt="Digital signature and company stamp"/></> : <div className="rq-signature-space" />}<div>[{company.signatoryName || "Authorised Signatory"}]</div></div>
-          {quotation.approvalStatus === "APPROVED" && quotation.approvedBy && <div className="rq-approval-line">Owner reviewed: {quotation.approvedBy.name}{quotation.approvedAt ? ` · ${formatDate(quotation.approvedAt)}` : ""}</div>}
-        </div>}
-        <QuotationFooter company={company} />
+            <div className="rq2-subject"><b>Subject:</b><span>{quotation.subject}</span></div>
+            <div className="rq2-opening">
+              <p>Dear Sir,</p>
+              <p>{quotation.introduction || `With reference to your requirement, we are pleased to submit our quotation for ${quotation.scope}. The scope and commercial details are given below.`}</p>
+            </div>
+          </> : <div className="rq2-continuation"><span>{quotation.referenceNo}</span><b>Continuation - Page {pageIndex + 1} of {pages.length}</b></div>}
+
+          <h2 className="rq2-section-title">{isFirst ? "PRICE SCHEDULE" : "PRICE SCHEDULE - CONTINUED"}</h2>
+          <QuotationItemsTable items={items} startIndex={startIndex} />
+
+          {isLast && <>
+            <div className="rq2-summary-grid">
+              <div className="rq2-words">
+                <span>Grand Total in Words</span>
+                <b>{amountInWords(quotation.amount)}</b>
+              </div>
+              <div className="rq2-totals">
+                <div><span>Sub Total</span><b>₹ {money(quotation.taxableValue)}</b></div>
+                {quotation.gstType === "SGST_CGST" ? <>
+                  <div><span>CGST @ 9%</span><b>₹ {money(cgst)}</b></div>
+                  <div><span>SGST @ 9%</span><b>₹ {money(sgst)}</b></div>
+                </> : <div><span>IGST @ 18%</span><b>₹ {money(igst)}</b></div>}
+                <div className="rq2-grand"><span>Grand Total</span><b>₹ {money(quotation.amount)}/-</b></div>
+              </div>
+            </div>
+
+            {noteLines.length > 0 && <section className="rq2-detail-section"><h3>SCOPE / TECHNICAL NOTES</h3><ul>{noteLines.map((line, i) => <li key={i}>{line}</li>)}</ul></section>}
+            {termLines.length > 0 && <section className="rq2-detail-section rq2-terms"><h3>COMMERCIAL TERMS &amp; CONDITIONS</h3><ol>{termLines.map((line, i) => <li key={i}>{line}</li>)}</ol></section>}
+
+            {quotation.bankAccount && <section className="rq2-bank-inline"><h3>BANK DETAILS</h3><div><b>{quotation.bankAccount.bankName}</b> · A/c {quotation.bankAccount.accountNo} · IFSC {quotation.bankAccount.ifsc}{quotation.bankAccount.branch ? ` · ${quotation.bankAccount.branch}` : ""}</div></section>}
+
+            <p className="rq2-closing-text">{closingFor(quotation)}</p>
+            <div className="rq2-signoff">
+              <p><b>Thanking you,</b></p>
+              <p><b>Yours faithfully,</b></p>
+              <p>For <b>{company.legalName}</b></p>
+              {quotation.includeSignature ? <>{/* eslint-disable-next-line @next/next/no-img-element */}<img src={quotation.signaturePreviewUrl || "/brand/salman-sign-stamp.png"} alt="Authorised signature and company stamp" /></> : <div className="rq2-sign-space" />}
+            </div>
+          </>}
+        </main>
+
+        <div className="rq2-page-no">Page {pageIndex + 1} of {pages.length}</div>
       </section>;
     })}
   </div>;
 }
 
-function QuotationLetterhead({ company }: { company: CompanyInfo }) {
-  return <header className="rq-letterhead"><div className="rq-company-meta"><div>G.S.T. No. {company.gstin}</div><div>{(company.tagline || "ELECTRICAL, MECHANICAL & CIVIL CONTRACTOR").toUpperCase()}</div></div>{/* eslint-disable-next-line @next/next/no-img-element */}<img className="rq-wordmark" src={company.logoUrl || "/brand/ratneswar-wordmark.png"} alt={company.tradeName || company.legalName}/></header>;
-}
-
-function QuotationItemsTable({ items, startIndex, hasSecondary, primaryHeader, secondaryHeader }: { items: QuotationDetail["items"]; startIndex: number; hasSecondary: boolean; primaryHeader: string; secondaryHeader: string }) {
-  return <table className="rq-table"><thead><tr><th>Sr. No.</th><th>Description of Work</th><th>{primaryHeader}</th>{hasSecondary && <th>{secondaryHeader}</th>}<th>Rate (₹)</th>{hasSecondary && <th>Unit</th>}<th>Amount (₹)</th></tr></thead><tbody>{items.map((item, i) => <tr key={item.id}><td>{startIndex + i + 1}</td><td>{item.description}</td><td>{item.calculationMode === "FIXED" ? (item.unit || "L.S.") : `${Number(item.quantity).toLocaleString("en-IN")} ${hasSecondary ? "" : item.unit || ""}`}</td>{hasSecondary && <td>{item.secondaryQuantity == null ? "" : Number(item.secondaryQuantity).toLocaleString("en-IN")}</td>}<td>{item.calculationMode === "FIXED" && item.rate === item.amount ? "—" : money(item.rate)}</td>{hasSecondary && <td>{item.rateBasis || item.unit || ""}</td>}<td><b>{money(item.amount)}</b></td></tr>)}</tbody></table>;
-}
-
-function QuotationFooter({ company }: { company: CompanyInfo }) {
-  return <footer className="rq-footer"><div>{company.address}</div><div>(M) {company.phone} &nbsp;&nbsp; E-mail : {company.email}</div></footer>;
+function QuotationItemsTable({ items, startIndex }: { items: QuotationDetail["items"]; startIndex: number }) {
+  return <table className="rq2-table">
+    <thead><tr><th className="rq2-sl">Sr. No.</th><th>Description / Particulars</th><th className="rq2-hsn">HSN/SAC</th><th className="rq2-qty">Qty</th><th className="rq2-unit">Unit</th><th className="rq2-rate">Rate (₹)</th><th className="rq2-amount">Amount (₹)</th></tr></thead>
+    <tbody>{items.map((item, i) => <tr key={item.id}>
+      <td className="rq2-center">{startIndex + i + 1}</td>
+      <td className="rq2-description">{item.description}</td>
+      <td className="rq2-center">{item.hsnCode || "-"}</td>
+      <td className="rq2-center">{item.calculationMode === "FIXED" ? "1" : Number(item.quantity).toLocaleString("en-IN")}</td>
+      <td className="rq2-center">{item.calculationMode === "FIXED" ? (item.rateBasis || item.unit || "Job") : (item.unit || "Nos")}</td>
+      <td className="rq2-right">{item.calculationMode === "FIXED" ? money(item.amount) : money(item.rate)}</td>
+      <td className="rq2-right rq2-bold">{money(item.amount)}</td>
+    </tr>)}</tbody>
+  </table>;
 }
