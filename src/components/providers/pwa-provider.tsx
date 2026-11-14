@@ -28,19 +28,19 @@ export function PwaProvider({ children }: { children: React.ReactNode }) {
   const [canInstall, setCanInstall] = React.useState(false);
 
   React.useEffect(() => {
-    // Register the service worker once, in production only, after first paint.
-    if (
-      typeof window !== "undefined" &&
-      "serviceWorker" in navigator &&
-      process.env.NODE_ENV === "production"
-    ) {
-      const register = () => {
-        navigator.serviceWorker.register("/sw.js").catch(() => {
-          // Non-fatal — app still works without offline support.
+    // ERP pages are authenticated/live-data pages. Remove any previously
+    // installed worker so network/runtime failures are never masked as offline.
+    if (typeof window !== "undefined" && "serviceWorker" in navigator) {
+      navigator.serviceWorker.getRegistrations().then((registrations) => {
+        registrations.forEach((registration) => registration.unregister());
+      }).catch(() => {
+        // Non-fatal.
+      });
+      if ("caches" in window) {
+        caches.keys().then((keys) => Promise.all(keys.map((key) => caches.delete(key)))).catch(() => {
+          // Non-fatal.
         });
-      };
-      window.addEventListener("load", register);
-      return () => window.removeEventListener("load", register);
+      }
     }
   }, []);
 
