@@ -29,7 +29,17 @@ function serializeUser(appUser: {
 
 export async function getCurrentUser(): Promise<AppUser | null> {
   const supabase = await createClient();
-  const { data: { user: authUser } } = await supabase.auth.getUser();
+  let authUser;
+  try {
+    const result = await supabase.auth.getUser();
+    authUser = result.data.user;
+  } catch (error) {
+    console.error("[auth:supabase] getCurrentUser failed", {
+      name: error instanceof Error ? error.name : "UnknownError",
+      message: error instanceof Error ? error.message.slice(0, 500) : String(error).slice(0, 500),
+    });
+    throw error;
+  }
   if (!authUser) return null;
 
   const appUser = await withDatabaseRetry(
@@ -47,7 +57,17 @@ export async function getCurrentUser(): Promise<AppUser | null> {
  */
 const resolveRequiredUser = cache(async (): Promise<AppUser> => {
   const supabase = await createClient();
-  const { data: { user: authUser } } = await supabase.auth.getUser();
+  let authUser;
+  try {
+    const result = await supabase.auth.getUser();
+    authUser = result.data.user;
+  } catch (error) {
+    console.error("[auth:supabase] requireUser failed", {
+      name: error instanceof Error ? error.name : "UnknownError",
+      message: error instanceof Error ? error.message.slice(0, 500) : String(error).slice(0, 500),
+    });
+    throw error;
+  }
   if (!authUser) redirect("/login");
 
   const appUser = await withDatabaseRetry(

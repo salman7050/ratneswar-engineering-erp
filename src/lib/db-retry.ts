@@ -22,6 +22,24 @@ function wait(milliseconds: number) {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
 
+function safeDatabaseError(error: unknown) {
+  if (!error || typeof error !== "object") {
+    return { name: "UnknownError", code: "unknown", message: String(error) };
+  }
+
+  const candidate = error as { name?: string; code?: string; message?: string };
+  const message = (candidate.message ?? "Unknown database error")
+    .replace(/postgres(?:ql)?:\/\/[^\s'"]+/gi, "[DATABASE_URL_REDACTED]")
+    .replace(/password\s*[:=]\s*[^\s,;]+/gi, "password=[REDACTED]")
+    .slice(0, 700);
+
+  return {
+    name: candidate.name ?? "Error",
+    code: candidate.code ?? "unknown",
+    message,
+  };
+}
+
 /** Retries short-lived Supabase/Supavisor failures without hiding real query errors. */
 export async function withDatabaseRetry<T>(
   operation: () => Promise<T>,
@@ -35,9 +53,17 @@ export async function withDatabaseRetry<T>(
       return await operation();
     } catch (error) {
       lastError = error;
-      if (!retryable(error) || attempt === attempts) throw error;
-      const code = typeof error === "object" && error && "code" in error ? String(error.code) : "network";
-      console.warn(`[database:${label}] retry ${attempt}/${attempts - 1} (${code})`);
+      const safe = safeDatabaseError(error);
+
+      if (!retryable(error) || attempt === attempts) {
+        console.error(`[database:${label}] failed`, safe);
+        throw error;
+      }
+
+      console.warn(
+        `[database:${label}] retry ${attempt}/${attempts - 1}`,
+        { code: safe.code, name: safe.name }
+      );
       await wait(attempt * 180);
     }
   }
