@@ -23,9 +23,12 @@ const nextConfig = {
     },
     optimizePackageImports: ["lucide-react", "recharts", "framer-motion"],
   },
-  // Prisma Client is generated for the Cloudflare workerd runtime into src/generated/prisma.
-  // It is bundled as application source, so no filesystem WASM tracing is required.
+  // OpenNext <=1.20.14 only selects workerd-specific package exports for
+  // dependencies explicitly externalized here. Prisma's generated client lives
+  // in both @prisma/client and .prisma/client, so both must stay external.
   serverExternalPackages: [
+    "@prisma/client",
+    ".prisma/client",
     "@prisma/adapter-pg",
     "pg"
   ],

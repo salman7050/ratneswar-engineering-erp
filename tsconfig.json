@@ -43,9 +43,6 @@
       ],
       "@/config/*": [
         "./src/config/*"
-      ],
-      "@prisma/client": [
-        "./src/generated/prisma/client"
       ]
     }
   },
