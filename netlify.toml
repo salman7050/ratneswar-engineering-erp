@@ -1,4 +1,6 @@
 [build]
+  # Cloudflare is the production host. Skip legacy Netlify Git-triggered builds.
+  ignore = "exit 0"
   command = "npm run db:deploy && npm run build"
   publish = ".next"
 
