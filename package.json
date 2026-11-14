@@ -5,8 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && next build",
-    "cf:build": "prisma generate && opennextjs-cloudflare build --dangerouslyUseUnsupportedNextVersion",
-    "preview": "opennextjs-cloudflare build --dangerouslyUseUnsupportedNextVersion && opennextjs-cloudflare preview",
+    "cf:build": "npm run clean:cf && opennextjs-cloudflare build --dangerouslyUseUnsupportedNextVersion",
+    "preview": "npm run clean:cf && opennextjs-cloudflare build --dangerouslyUseUnsupportedNextVersion && opennextjs-cloudflare preview",
     "deploy": "npm run cf:build && opennextjs-cloudflare deploy",
     "cf:typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
     "start": "next start",
@@ -21,7 +21,8 @@
     "check:project": "node scripts/validate-project.cjs",
     "verify": "npm run check:project && npm run check:v8 && npm run build",
     "check:v7": "node scripts/validate-v7.cjs",
-    "check:v8": "node scripts/validate-v8.cjs"
+    "check:v8": "node scripts/validate-v8.cjs",
+    "clean:cf": "node -e \"const fs=require('fs'); for (const p of ['.next','.open-next','src/generated/prisma']) fs.rmSync(p,{recursive:true,force:true});\""
   },
   "dependencies": {
     "@prisma/adapter-pg": "6.19.0",
