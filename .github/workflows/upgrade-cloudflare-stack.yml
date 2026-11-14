@@ -1,0 +1,66 @@
+name: Verify and upgrade Cloudflare runtime stack
+
+on:
+  push:
+    paths:
+      - ".github/workflows/upgrade-cloudflare-stack.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  upgrade-and-verify:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: postgresql://user:pass@127.0.0.1:5432/db
+      DIRECT_URL: postgresql://user:pass@127.0.0.1:5432/db
+      NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: dummy-anon-key
+      SUPABASE_SERVICE_ROLE_KEY: dummy-service-role-key
+      NEXT_PUBLIC_APP_URL: https://example.workers.dev
+      NEXT_PUBLIC_APP_NAME: Ratneswar Engineering ERP
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Upgrade deploy-critical dependencies
+        run: |
+          npm install --save-exact next@15.5.29 @prisma/client@6.19.3 @prisma/adapter-pg@6.19.3
+          npm install --save-dev --save-exact prisma@6.19.3 eslint-config-next@15.5.29 @opennextjs/cloudflare@1.20.17
+
+      - name: Remove obsolete unsupported-version bypass
+        run: |
+          node - <<'NODE'
+          const fs = require("fs");
+          const p = JSON.parse(fs.readFileSync("package.json","utf8"));
+          p.scripts["cf:build"] = p.scripts["cf:build"].replace(" --dangerouslyUseUnsupportedNextVersion","");
+          p.scripts["preview"] = p.scripts["preview"].replace(" --dangerouslyUseUnsupportedNextVersion","");
+          fs.writeFileSync("package.json", JSON.stringify(p,null,2)+"\n");
+          NODE
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Full OpenNext Cloudflare build
+        run: npm run cf:build
+
+      - name: Wrangler dry-run bundle verification
+        run: npx wrangler deploy --dry-run --outdir=.wrangler-dry
+
+      - name: Commit verified dependency lock
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json package-lock.json
+          if git diff --cached --quiet; then
+            echo "No dependency changes to commit."
+            exit 0
+          fi
+          git commit -m "Upgrade verified Cloudflare Next Prisma runtime stack"
+          git push origin HEAD:main
