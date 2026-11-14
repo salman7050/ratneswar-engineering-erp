@@ -471,3 +471,101 @@
 .invoice-issuer-wordmark{max-width:92mm;text-align:right;font-size:16px;line-height:1.15;font-weight:900;letter-spacing:.02em;text-transform:uppercase;color:#111827}
 .invoice-signature-space{height:24mm;max-width:43mm;margin:0 auto}
 .rq-signature-space{display:block;height:24mm;max-width:45mm;margin:0 auto}
+
+
+/* === Ratneswar Quotation Professional Print V5 === */
+.ratneswar-quotation-page{
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 10.8px;
+  line-height: 1.34;
+}
+.ratneswar-quotation-page .rq-ref-row{
+  margin-top: 4mm;
+  font-size: 10.4px;
+}
+.ratneswar-quotation-page .rq-to-block{
+  margin-top: 4mm;
+  font-size: 10.7px;
+  line-height: 1.35;
+}
+.ratneswar-quotation-page .rq-subject{
+  margin-top: 4mm;
+  padding: 2.4mm 0;
+  font-size: 11.2px;
+  line-height: 1.35;
+}
+.ratneswar-quotation-page .rq-intro{
+  margin-top: 3.2mm;
+  font-size: 10.7px;
+  line-height: 1.42;
+}
+.ratneswar-quotation-page .rq-intro p{margin-top:1.2mm}
+.ratneswar-quotation-page .rq-table{
+  margin-top: 3.5mm;
+  font-size: 9.8px;
+  line-height: 1.25;
+}
+.ratneswar-quotation-page .rq-table th{
+  font-weight: 800;
+  background: rgba(230,238,246,.58);
+  padding: 1.8mm 1.4mm;
+}
+.ratneswar-quotation-page .rq-table td{
+  padding: 1.7mm 1.4mm;
+  vertical-align: top;
+}
+.ratneswar-quotation-page .rq-totals{
+  margin-top: 3.5mm;
+  font-size: 10.1px;
+}
+.ratneswar-quotation-page .rq-grand{
+  font-size: 11.5px;
+  font-weight: 800;
+}
+.ratneswar-quotation-page .rq-words{
+  margin-top: 1.8mm;
+  font-weight: 700;
+}
+.ratneswar-quotation-page .rq-list{
+  margin-top: 4mm;
+  font-size: 10.1px;
+  line-height: 1.38;
+}
+.ratneswar-quotation-page .rq-list>b{
+  display:block;
+  margin-bottom: 1.6mm;
+  font-size: 11px;
+}
+.ratneswar-quotation-page .rq-list ol{
+  margin:0;
+  padding-left: 5mm;
+}
+.ratneswar-quotation-page .rq-list li{margin-bottom:1mm}
+.ratneswar-quotation-page .rq-closing{
+  margin-top: 4mm;
+  font-size: 10.3px;
+  line-height: 1.4;
+}
+.ratneswar-quotation-page .rq-thanks{
+  margin-top: 4mm;
+}
+.ratneswar-quotation-page .rq-signature{
+  margin-top: 1mm;
+}
+.ratneswar-quotation-page .rq-signature img{
+  width: 43mm;
+  height: 27mm;
+  object-fit: contain;
+  object-position: center;
+}
+@media print{
+  .ratneswar-quotation-page{
+    box-shadow:none!important;
+    break-after:page;
+    page-break-after:always;
+  }
+  .ratneswar-quotation-page:last-child{
+    break-after:auto;
+    page-break-after:auto;
+  }
+}
