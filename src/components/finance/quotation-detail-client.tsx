@@ -21,6 +21,44 @@ import type { AppRole } from "@/types";
 
 const STATUS_VARIANT = { DRAFT: "outline", SENT: "info", ACCEPTED: "success", REJECTED: "destructive", EXPIRED: "secondary" } as const;
 
+function safeFilePart(value: string, fallback: string) {
+  const cleaned = value
+    .normalize("NFKD")
+    .replace(/[^a-zA-Z0-9.-]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^[.-]+|[.-]+$/g, "");
+  return cleaned || fallback;
+}
+
+function quotationFileName(quotation: QuotationDetail) {
+  const reference = safeFilePart(quotation.referenceNo.replace(/[\\/]+/g, "-"), "Quotation");
+  const customer = safeFilePart(quotation.client, "Customer");
+
+  const searchable = [
+    quotation.subject,
+    quotation.scope,
+    ...quotation.items.map((item) => `${item.shortDescription ?? ""} ${item.description}`),
+  ].join(" ");
+
+  const capacityMatch = searchable.match(/\b(\d+(?:\.\d+)?)\s*(kWp|kW|MWp|MW)\b/i);
+  const capacityOrWork = capacityMatch
+    ? `${capacityMatch[1]}${capacityMatch[2].replace(/p$/i, "p")}`
+    : safeFilePart((quotation.scope || quotation.subject).split(/[,;|]/)[0].split(/\s+/).slice(0, 5).join(" "), "Work");
+
+  const addressLocation = (quotation.clientAddress || "")
+    .split(/\r?\n|,/)
+    .map((part) => part.trim())
+    .filter(Boolean)[0] || "";
+  const location = safeFilePart(quotation.site?.name || addressLocation, "Location");
+
+  const date = new Date(quotation.date);
+  const dd = String(date.getDate()).padStart(2, "0");
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const yyyy = date.getFullYear();
+
+  return `${reference}_${customer}_${capacityOrWork}_${location}_${dd}-${mm}-${yyyy}.pdf`;
+}
+
 export function QuotationDetailClient({ quotation, company, history, userRole, userId }: {
   quotation: QuotationDetail;
   company: CompanyInfo;
@@ -38,11 +76,12 @@ export function QuotationDetailClient({ quotation, company, history, userRole, u
   const finalIssueAllowed = quotation.approvalStatus === "NOT_REQUIRED" || quotation.approvalStatus === "APPROVED";
   const ownerCanReview = userRole === "OWNER" && quotation.approvalStatus === "PENDING" && quotation.createdById !== userId;
   const shareMessage = `Please find our quotation ${quotation.referenceNo} for ${formatINR(quotation.amount)}.`;
+  const pdfFileName = quotationFileName(quotation);
 
   return <div className="mx-auto flex max-w-[1450px] flex-col gap-6 px-4 py-6 md:px-8">
     <div className="no-print flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
       <div><div className="flex flex-wrap items-center gap-2"><h1 className="font-mono text-lg font-bold text-slate-950">{quotation.referenceNo}</h1><Badge variant={STATUS_VARIANT[quotation.status]}>{quotation.status}</Badge>{quotation.riskLevel === "HIGH_RISK" && <Badge variant="warning"><ShieldAlert className="mr-1 h-3 w-3"/> High Risk</Badge>}{quotation.approvalStatus === "APPROVED" && <Badge variant="success">Owner Approved</Badge>}{quotation.approvalStatus === "PENDING" && <Badge variant="warning">Approval Pending</Badge>}{quotation.approvalStatus === "REJECTED" && <Badge variant="destructive">Revision Required</Badge>}</div><p className="mt-1 max-w-3xl text-sm text-slate-500">{quotation.subject}</p></div>
-      <div className="flex flex-wrap gap-2"><Button asChild variant="outline"><Link href={`/quotations/${quotation.id}/edit`}><Pencil className="h-4 w-4"/> Edit</Link></Button>{finalIssueAllowed && <PrintButton />}{finalIssueAllowed && <EmailShareButton to={null} subject={`Quotation ${quotation.referenceNo}`} body={shareMessage} />}{finalIssueAllowed && <WhatsAppShareButton phone={null} message={shareMessage} />}</div>
+      <div className="flex flex-wrap gap-2"><Button asChild variant="outline"><Link href={`/quotations/${quotation.id}/edit`}><Pencil className="h-4 w-4"/> Edit</Link></Button>{finalIssueAllowed && <PrintButton filename={pdfFileName} />}{finalIssueAllowed && <EmailShareButton to={null} subject={`Quotation ${quotation.referenceNo}`} body={shareMessage} />}{finalIssueAllowed && <WhatsAppShareButton phone={null} message={shareMessage} />}</div>
     </div>
 
     {!finalIssueAllowed && <Card className="no-print border-amber-200 bg-amber-50 p-4"><div className="flex gap-3"><ShieldAlert className="mt-0.5 h-5 w-5 text-amber-600"/><div><p className="font-semibold text-amber-950">Final PDF is locked until Owner approval</p><p className="mt-1 text-sm text-amber-800">You can review the A4 draft below. Print/PDF/Send controls unlock automatically after approval.</p>{quotation.riskReason && <p className="mt-1 text-xs font-medium text-amber-900">Risk reason: {quotation.riskReason}</p>}{quotation.approvalNote && <p className="mt-2 rounded-lg bg-white/70 p-2 text-xs text-amber-900">Review note: {quotation.approvalNote}</p>}</div></div></Card>}
