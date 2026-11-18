@@ -1,0 +1,36 @@
+name: Verify Cloudflare production build
+
+on:
+  push:
+    paths:
+      - ".github/workflows/verify-cloudflare.yml"
+      - "src/**"
+      - "prisma/**"
+      - "next.config.mjs"
+      - "open-next.config.ts"
+      - "wrangler.jsonc"
+      - "package.json"
+      - "package-lock.json"
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: postgresql://user:pass@127.0.0.1:5432/db
+      DIRECT_URL: postgresql://user:pass@127.0.0.1:5432/db
+      NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: dummy-anon-key
+      SUPABASE_SERVICE_ROLE_KEY: dummy-service-role-key
+      NEXT_PUBLIC_APP_URL: https://example.workers.dev
+      NEXT_PUBLIC_APP_NAME: Ratneswar Engineering ERP
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+      - run: npm ci
+      - run: npx prisma generate
+      - run: npm run cf:build
+      - run: npx wrangler deploy --dry-run --outdir=.wrangler-dry
