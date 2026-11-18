@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { OfficialQuotationPrint } from "@/components/finance/official-quotation-print";
-import { PrintButton, EmailShareButton, WhatsAppShareButton } from "@/components/finance/share-buttons";
+import { PrintButton, WordDownloadButton, EmailShareButton, WhatsAppShareButton } from "@/components/finance/share-buttons";
 import { HistoryPanel } from "@/components/finance/history-panel";
 import { updateQuotationStatus, convertQuotationToInvoice, approveQuotation, rejectQuotationApproval } from "@/lib/actions/quotation-actions";
 import { useAction } from "@/hooks/use-action";
@@ -18,6 +18,7 @@ import { formatINR } from "@/lib/utils";
 import type { QuotationDetail } from "@/lib/queries/quotations";
 import type { CompanyInfo } from "@/components/finance/document-print-view";
 import type { AppRole } from "@/types";
+import { createQuotationWord } from "@/lib/word/commercial-word";
 
 const STATUS_VARIANT = { DRAFT: "outline", SENT: "info", ACCEPTED: "success", REJECTED: "destructive", EXPIRED: "secondary" } as const;
 
@@ -30,7 +31,7 @@ function safeFilePart(value: string, fallback: string) {
   return cleaned || fallback;
 }
 
-function quotationFileName(quotation: QuotationDetail) {
+function quotationFileBaseName(quotation: QuotationDetail) {
   const reference = safeFilePart(quotation.referenceNo.replace(/[\\/]+/g, "-"), "Quotation");
   const customer = safeFilePart(quotation.client, "Customer");
 
@@ -56,7 +57,7 @@ function quotationFileName(quotation: QuotationDetail) {
   const mm = String(date.getMonth() + 1).padStart(2, "0");
   const yyyy = date.getFullYear();
 
-  return `${reference}_${customer}_${capacityOrWork}_${location}_${dd}-${mm}-${yyyy}.pdf`;
+  return `${reference}_${customer}_${capacityOrWork}_${location}_${dd}-${mm}-${yyyy}`;
 }
 
 export function QuotationDetailClient({ quotation, company, history, userRole, userId }: {
@@ -76,12 +77,14 @@ export function QuotationDetailClient({ quotation, company, history, userRole, u
   const finalIssueAllowed = quotation.approvalStatus === "NOT_REQUIRED" || quotation.approvalStatus === "APPROVED";
   const ownerCanReview = userRole === "OWNER" && quotation.approvalStatus === "PENDING" && quotation.createdById !== userId;
   const shareMessage = `Please find our quotation ${quotation.referenceNo} for ${formatINR(quotation.amount)}.`;
-  const pdfFileName = quotationFileName(quotation);
+  const fileBaseName = quotationFileBaseName(quotation);
+  const pdfFileName = `${fileBaseName}.pdf`;
+  const wordFileName = `${fileBaseName}.docx`;
 
   return <div className="mx-auto flex max-w-[1450px] flex-col gap-6 px-4 py-6 md:px-8">
     <div className="no-print flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
       <div><div className="flex flex-wrap items-center gap-2"><h1 className="font-mono text-lg font-bold text-slate-950">{quotation.referenceNo}</h1><Badge variant={STATUS_VARIANT[quotation.status]}>{quotation.status}</Badge>{quotation.riskLevel === "HIGH_RISK" && <Badge variant="warning"><ShieldAlert className="mr-1 h-3 w-3"/> High Risk</Badge>}{quotation.approvalStatus === "APPROVED" && <Badge variant="success">Owner Approved</Badge>}{quotation.approvalStatus === "PENDING" && <Badge variant="warning">Approval Pending</Badge>}{quotation.approvalStatus === "REJECTED" && <Badge variant="destructive">Revision Required</Badge>}</div><p className="mt-1 max-w-3xl text-sm text-slate-500">{quotation.subject}</p></div>
-      <div className="flex flex-wrap gap-2"><Button asChild variant="outline"><Link href={`/quotations/${quotation.id}/edit`}><Pencil className="h-4 w-4"/> Edit</Link></Button>{finalIssueAllowed && <PrintButton filename={pdfFileName} />}{finalIssueAllowed && <EmailShareButton to={null} subject={`Quotation ${quotation.referenceNo}`} body={shareMessage} />}{finalIssueAllowed && <WhatsAppShareButton phone={null} message={shareMessage} />}</div>
+      <div className="flex flex-wrap gap-2"><Button asChild variant="outline"><Link href={`/quotations/${quotation.id}/edit`}><Pencil className="h-4 w-4"/> Edit</Link></Button>{finalIssueAllowed && <PrintButton filename={pdfFileName} />}{finalIssueAllowed && <WordDownloadButton filename={wordFileName} createBlob={() => createQuotationWord(quotation, company)} />}{finalIssueAllowed && <EmailShareButton to={null} subject={`Quotation ${quotation.referenceNo}`} body={shareMessage} />}{finalIssueAllowed && <WhatsAppShareButton phone={null} message={shareMessage} />}</div>
     </div>
 
     {!finalIssueAllowed && <Card className="no-print border-amber-200 bg-amber-50 p-4"><div className="flex gap-3"><ShieldAlert className="mt-0.5 h-5 w-5 text-amber-600"/><div><p className="font-semibold text-amber-950">Final PDF is locked until Owner approval</p><p className="mt-1 text-sm text-amber-800">You can review the A4 draft below. Print/PDF/Send controls unlock automatically after approval.</p>{quotation.riskReason && <p className="mt-1 text-xs font-medium text-amber-900">Risk reason: {quotation.riskReason}</p>}{quotation.approvalNote && <p className="mt-2 rounded-lg bg-white/70 p-2 text-xs text-amber-900">Review note: {quotation.approvalNote}</p>}</div></div></Card>}
