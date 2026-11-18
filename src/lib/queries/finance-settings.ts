@@ -4,14 +4,21 @@ import { resolveStoredFileUrl } from "@/lib/supabase/storage-server";
 import { withDatabaseRetry } from "@/lib/db-retry";
 
 export async function getCompanySettings() {
-  const record = await withDatabaseRetry(
-    () => prisma.companySettings.upsert({
-      where: { id: "singleton" },
-      update: {},
-      create: { id: "singleton" },
-    }),
+  let record = await withDatabaseRetry(
+    () => prisma.companySettings.findUnique({ where: { id: "singleton" } }),
     "company-settings"
   );
+
+  // Never write on a normal dashboard read. Writing here used to fire the
+  // database-wide realtime trigger, which caused CloudSyncRefresh -> router.refresh()
+  // -> getCompanySettings() -> UPDATE -> realtime event in an endless loop.
+  if (!record) {
+    record = await withDatabaseRetry(
+      () => prisma.companySettings.create({ data: { id: "singleton" } }),
+      "company-settings-create"
+    );
+  }
+
   return { ...record, ownerApprovalThreshold: Number(record.ownerApprovalThreshold) };
 }
 

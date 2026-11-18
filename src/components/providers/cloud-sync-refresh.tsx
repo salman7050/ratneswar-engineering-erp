@@ -37,15 +37,15 @@ export function CloudSyncRefresh() {
       )
       .subscribe();
 
-    // Fallback refresh keeps screens current even if a realtime connection is
-    // temporarily interrupted. Focus refresh makes mobile switching seamless.
-    const fallbackTimer = window.setInterval(refresh, 30_000);
+    // Realtime events are the primary sync path. Refresh when the user returns
+    // to the app, but do not force a router.refresh() every 30 seconds; that
+    // creates needless database load and can turn transient errors into a full
+    // dashboard failure.
     const onFocus = () => refresh();
     window.addEventListener("focus", onFocus);
 
     return () => {
       if (debounceTimer) window.clearTimeout(debounceTimer);
-      window.clearInterval(fallbackTimer);
       window.removeEventListener("focus", onFocus);
       void supabase.removeChannel(channel);
     };
