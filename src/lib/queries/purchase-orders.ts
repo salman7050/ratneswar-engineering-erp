@@ -71,7 +71,7 @@ export async function getPurchaseOrderDetail(id: string) {
   };
 }
 
-/** PO-YYYY-#### — resets sequence each calendar year, matches this ERP's other document-numbering conventions. */
+/** RE/PO/26-27/### — financial-year-wise running sequence shared with the ERP document numbering system. */
 export async function suggestNextPONumber(): Promise<string> {
   return documentNumberPreview("PURCHASE_ORDER");
 }
