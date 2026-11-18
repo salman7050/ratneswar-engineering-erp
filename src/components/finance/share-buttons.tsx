@@ -1,6 +1,7 @@
 "use client";
 
-import { Mail, MessageCircle, Printer } from "lucide-react";
+import * as React from "react";
+import { FileDown, Mail, MessageCircle, Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export function PrintButton({ filename }: { filename?: string }) {
@@ -48,6 +49,43 @@ export function WhatsAppShareButton({
   return (
     <Button variant="outline" asChild>
       <a href={href} target="_blank" rel="noreferrer"><MessageCircle className="h-4 w-4" /> WhatsApp</a>
+    </Button>
+  );
+}
+
+
+export function WordDownloadButton({
+  filename,
+  createBlob,
+}: {
+  filename: string;
+  createBlob: () => Promise<Blob>;
+}) {
+  const [loading, setLoading] = React.useState(false);
+
+  async function download() {
+    setLoading(true);
+    try {
+      const blob = await createBlob();
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = filename.toLowerCase().endsWith(".docx") ? filename : `${filename}.docx`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch (error) {
+      console.error("Word download failed", error);
+      window.alert("Word file could not be generated. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <Button variant="outline" loading={loading} onClick={() => void download()}>
+      <FileDown className="h-4 w-4" /> Download Word
     </Button>
   );
 }
