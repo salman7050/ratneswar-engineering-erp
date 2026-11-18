@@ -20,23 +20,40 @@ export function indiaDayRange(now = new Date()) {
   return { key, start, end };
 }
 
+async function safeDashboardQuery<T>(
+  label: string,
+  operation: () => Promise<T>,
+  fallback: T
+): Promise<T> {
+  try {
+    return await withDatabaseRetry(operation, label);
+  } catch (error) {
+    console.error(`[dashboard:${label}] using fallback`, {
+      name: error instanceof Error ? error.name : "UnknownError",
+      message: error instanceof Error ? error.message.slice(0, 500) : String(error).slice(0, 500),
+    });
+    return fallback;
+  }
+}
+
 export async function getCleanDashboardData(user: AppUser) {
   const { key, start, end } = indiaDayRange();
   const thirtyDaysAgo = new Date(start.getTime() - 30 * 86_400_000);
 
-  // Supabase Transaction Pooler is configured with connection_limit=1 in
-  // production. Keep dashboard reads sequential so one request cannot exhaust
-  // its own Prisma pool while rendering the page.
-  const todayTasks = await withDatabaseRetry(
+  // Dashboard stability rule:
+  // each section is isolated. One failed query must never crash the whole ERP home.
+  const todayTasks = await safeDashboardQuery(
+    "dashboard-today-tasks",
     () => prisma.task.findMany({
       where: { assignedToId: user.id, dueDate: { gte: start, lt: end } },
       include: { site: { select: { id: true, name: true } }, _count: { select: { comments: true } } },
       orderBy: [{ status: "asc" }, { dueTime: "asc" }, { priority: "desc" }],
     }),
-    "dashboard-today-tasks"
+    []
   );
 
-  const pendingWorks = await withDatabaseRetry(
+  const pendingWorks = await safeDashboardQuery(
+    "dashboard-pending-tasks",
     () => prisma.task.findMany({
       where: {
         assignedToId: user.id,
@@ -47,30 +64,32 @@ export async function getCleanDashboardData(user: AppUser) {
       orderBy: [{ dueDate: "asc" }, { priority: "desc" }],
       take: 12,
     }),
-    "dashboard-pending-tasks"
+    []
   );
 
-  // One site query supplies the count, recent-site cards and task form options.
-  const activeSiteRows = await withDatabaseRetry(
+  const activeSiteRows = await safeDashboardQuery(
+    "dashboard-active-sites",
     () => prisma.site.findMany({
       where: { status: "ACTIVE" },
       select: { id: true, name: true, capacity: true, type: true, updatedAt: true },
       orderBy: { updatedAt: "desc" },
     }),
-    "dashboard-active-sites"
+    []
   );
 
-  const recentInvoices = await withDatabaseRetry(
+  const recentInvoices = await safeDashboardQuery(
+    "dashboard-recent-invoices",
     () => prisma.invoice.findMany({
       where: { createdAt: { gte: thirtyDaysAgo } },
       select: { id: true, invoiceNo: true, status: true, date: true, buyerName: true, site: { select: { name: true } } },
       orderBy: { createdAt: "desc" },
       take: 5,
     }),
-    "dashboard-recent-invoices"
+    []
   );
 
-  const recentExpenses = await withDatabaseRetry(
+  const recentExpenses = await safeDashboardQuery(
+    "dashboard-recent-expenses",
     () => prisma.expense.findMany({
       where: { createdAt: { gte: thirtyDaysAgo } },
       select: {
@@ -87,23 +106,25 @@ export async function getCleanDashboardData(user: AppUser) {
       orderBy: { createdAt: "desc" },
       take: 5,
     }),
-    "dashboard-recent-expenses"
+    []
   );
 
-  const openPurchaseOrders = await withDatabaseRetry(
+  const openPurchaseOrders = await safeDashboardQuery(
+    "dashboard-open-purchase-orders",
     () => prisma.purchaseOrder.count({
       where: { status: { in: ["DRAFT", "PENDING_APPROVAL", "APPROVED", "ISSUED", "PARTIALLY_RECEIVED"] } },
     }),
-    "dashboard-open-purchase-orders"
+    0
   );
 
-  const teamOptions = await withDatabaseRetry(
+  const teamOptions = await safeDashboardQuery(
+    "dashboard-team-options",
     () => prisma.user.findMany({
       where: { isActive: true, role: { in: ["OWNER", "ADMIN"] } },
       select: { id: true, name: true },
       orderBy: { name: "asc" },
     }),
-    "dashboard-team-options"
+    []
   );
 
   const activeSites = activeSiteRows.length;

@@ -2,7 +2,6 @@ import { requireUser } from "@/lib/auth";
 import { UserProvider } from "@/components/providers/supabase-provider";
 import { DashboardShell } from "@/components/layout/dashboard-shell";
 import { getCompanySettings } from "@/lib/queries/finance-settings";
-import { CloudSyncRefresh } from "@/components/providers/cloud-sync-refresh";
 
 export default async function DashboardLayout({
   children,
@@ -25,7 +24,6 @@ export default async function DashboardLayout({
 
   return (
     <UserProvider user={user}>
-      <CloudSyncRefresh />
       <DashboardShell brand={{ name: company.tradeName || company.legalName, tagline: company.tagline, logoUrl: company.logoUrl }}>{children}</DashboardShell>
     </UserProvider>
   );
