@@ -11,6 +11,7 @@ import { useUser } from "@/components/providers/supabase-provider";
 import { can } from "@/lib/rbac";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
+import { TodoDrawer } from "@/components/todo/todo-drawer";
 import type { NavItem } from "@/types";
 
 export function NavLink({ item, collapsed }: { item: NavItem; collapsed: boolean }) {
@@ -48,7 +49,7 @@ export function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle:
           {groups.map((group) => {
             const items = group.items.map((href) => visible.find((v) => v.href === href)).filter(Boolean) as NavItem[];
             if (!items.length) return null;
-            return <section key={group.label}>{!collapsed && <p className="mb-2 px-3 text-[9px] font-bold uppercase tracking-[0.19em] text-blue-400/80">{group.label}</p>}<nav className="space-y-1">{items.map((item) => <NavLink key={item.href} item={item} collapsed={collapsed} />)}</nav></section>;
+            return <section key={group.label}>{!collapsed && <p className="mb-2 px-3 text-[9px] font-bold uppercase tracking-[0.19em] text-blue-400/80">{group.label}</p>}<nav className="space-y-1">{items.map((item) => <React.Fragment key={item.href}><NavLink item={item} collapsed={collapsed} />{item.href === "/dashboard" && <TodoDrawer collapsed={collapsed} />}</React.Fragment>)}</nav></section>;
           })}
           {secondary.length > 0 && <section className="border-t border-blue-100/70 pt-4">{!collapsed && <p className="mb-2 px-3 text-[9px] font-bold uppercase tracking-[0.19em] text-blue-400/80">Administration</p>}<nav className="space-y-1">{secondary.map((item) => <NavLink key={item.href} item={item} collapsed={collapsed} />)}</nav></section>}
         </div>

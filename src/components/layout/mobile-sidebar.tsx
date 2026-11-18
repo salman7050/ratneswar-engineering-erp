@@ -9,6 +9,7 @@ import { NAV_ITEMS, SECONDARY_NAV_ITEMS } from "@/config/nav";
 import { NavLink } from "@/components/layout/sidebar";
 import { useUser } from "@/components/providers/supabase-provider";
 import { can } from "@/lib/rbac";
+import { TodoDrawer } from "@/components/todo/todo-drawer";
 
 export function MobileSidebar({ brand: _brand }: { brand: { name: string; tagline: string; logoUrl?: string | null } }) {
   const [open, setOpen] = React.useState(false);
@@ -23,7 +24,7 @@ export function MobileSidebar({ brand: _brand }: { brand: { name: string; taglin
       <SheetContent side="left" className="flex w-[300px] flex-col border-blue-100 bg-white/90 p-0 backdrop-blur-2xl">
         <div className="flex h-[72px] items-center border-b border-blue-100 px-4"><img src="/brand/ratneswar-wordmark.png" alt="Ratneswar Engineering" className="h-[50px] w-[205px] object-contain object-left" /></div>
         <nav className="flex flex-col gap-1 overflow-y-auto px-3 py-4" onClick={() => setOpen(false)}>
-          {primary.map((item) => <NavLink key={item.href} item={item} collapsed={false} />)}
+          {primary.map((item) => <React.Fragment key={item.href}><NavLink item={item} collapsed={false} />{item.href === "/dashboard" && <TodoDrawer collapsed={false} mobile />}</React.Fragment>)}
           {secondary.length > 0 && <><Separator className="my-3" />{secondary.map((item) => <NavLink key={item.href} item={item} collapsed={false} />)}</>}
         </nav>
       </SheetContent>

@@ -108,6 +108,33 @@ export async function updateTaskProgress(input: z.infer<typeof taskProgressSchem
   return ok(task);
 }
 
+
+const taskPrioritySchema = z.object({
+  id: z.string(),
+  priority: z.enum(["LOW", "MEDIUM", "HIGH", "URGENT"]),
+});
+
+export async function updateTaskPriority(input: z.infer<typeof taskPrioritySchema>) {
+  const { user, error } = await authorize(MODULE, "edit");
+  if (!user) return error;
+
+  const parsed = taskPrioritySchema.safeParse(input);
+  if (!parsed.success) return zodError(parsed.error);
+
+  const existing = await prisma.task.findUnique({ where: { id: parsed.data.id } });
+  if (!existing || (existing.assignedToId !== user.id && existing.createdById !== user.id)) {
+    return fail("Task not found.");
+  }
+
+  const task = await prisma.task.update({
+    where: { id: parsed.data.id },
+    data: { priority: parsed.data.priority },
+  });
+
+  revalidatePath(REVALIDATE_PATH);
+  return ok(task);
+}
+
 export async function deleteTask(id: string) {
   const { user, error } = await authorize(MODULE, "delete");
   if (!user) return error;
