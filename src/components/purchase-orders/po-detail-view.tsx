@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { StatusChip } from "@/components/ui/status-chip";
 import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from "@/components/ui/alert-dialog";
 import type { CompanyInfo } from "@/components/finance/document-print-view";
-import { PrintButton, EmailShareButton, WhatsAppShareButton } from "@/components/finance/share-buttons";
+import { PrintButton, WordDownloadButton, EmailShareButton, WhatsAppShareButton } from "@/components/finance/share-buttons";
 import { POPrintView } from "./po-print-view";
 import { submitForApproval, deletePurchaseOrder, duplicatePurchaseOrder, updatePurchaseOrderStatus } from "@/lib/actions/purchase-order-actions";
 import { useAction } from "@/hooks/use-action";
@@ -19,12 +19,13 @@ import { POAttachmentsPanel } from "./po-attachments-panel";
 import { PO_STATUS_META, PO_PRIORITY_META } from "./po-utils";
 import { formatINR, formatDate } from "@/lib/utils";
 import type { PurchaseOrderDetail } from "@/lib/queries/purchase-orders";
+import { createPurchaseOrderWord } from "@/lib/word/commercial-word";
 
 function Info({ label, value }: { label: string; value: React.ReactNode }) {
   if (value === null || value === undefined || value === "") return null;
   return <div><p className="text-[10px] uppercase tracking-wide text-slate-400">{label}</p><p className="mt-0.5 text-sm text-slate-800">{value}</p></div>;
 }
-function filePart(value: string) { return value.replace(/[^a-z0-9]+/gi, "_").replace(/^_+|_+$/g, ""); }
+function filePart(value: string) { return value.normalize("NFKD").replace(/[^a-z0-9.-]+/gi, "-").replace(/-+/g, "-").replace(/^[.-]+|[.-]+$/g, ""); }
 function datePart(date: Date | string) { const d = new Date(date); return `${String(d.getDate()).padStart(2,"0")}-${String(d.getMonth()+1).padStart(2,"0")}-${d.getFullYear()}`; }
 
 type POCompany = CompanyInfo & { poContactName?: string | null; poContactEmail?: string | null; poContactPhone?: string | null };
@@ -38,7 +39,11 @@ export function PODetailView({ po, company, userRole }: { po: PurchaseOrderDetai
   const { run: runDuplicate, loading: duplicating } = useAction(duplicatePurchaseOrder, { successMessage: "Duplicated as a new draft", onSuccess: (created) => router.push(`/purchase-orders/${(created as { id: string }).id}`) });
   const { run: runStatus, loading: statusLoading } = useAction(updatePurchaseOrderStatus, { onSuccess: () => router.refresh() });
   const emailBody = `Dear ${po.vendorName},\n\nPlease find our Purchase Order ${po.poNo} dated ${formatDate(po.date)}. The Grand Total inclusive of applicable GST is ${formatINR(po.grandTotal)}.\n\nRegards,\n${company.legalName}`;
-  const pdfFilename = `PO_${filePart(po.poNo)}_${filePart(po.vendorName)}_${datePart(po.date)}.pdf`;
+  const workName = filePart((po.projectName || po.items[0]?.description || "Purchase-Order").split(/\s+/).slice(0, 6).join(" "));
+  const siteName = filePart(po.site?.name || "Location");
+  const fileBaseName = `${filePart(po.poNo)}_${filePart(po.vendorName)}_${workName}_${siteName}_${datePart(po.date)}`;
+  const pdfFilename = `${fileBaseName}.pdf`;
+  const wordFilename = `${fileBaseName}.docx`;
 
   return <div className="flex flex-col gap-4 pb-10">
     <Card className="no-print border-slate-200 bg-white p-5 shadow-sm">
@@ -52,6 +57,7 @@ export function PODetailView({ po, company, userRole }: { po: PurchaseOrderDetai
           {["APPROVED", "ISSUED", "PARTIALLY_RECEIVED", "DRAFT", "PENDING_APPROVAL"].includes(po.status) && <AlertDialog><AlertDialogTrigger asChild><Button size="sm" variant="outline"><XCircle className="h-3.5 w-3.5" /> Cancel</Button></AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Cancel this purchase order?</AlertDialogTitle><AlertDialogDescription>The PO will be marked cancelled.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Back</AlertDialogCancel><AlertDialogAction disabled={statusLoading} onClick={() => runStatus({ id: po.id, status: "CANCELLED" })}>Cancel PO</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>}
           <Button size="sm" variant="outline" loading={duplicating} onClick={() => runDuplicate(po.id)}><Copy className="h-3.5 w-3.5" /> Duplicate</Button>
           <PrintButton filename={pdfFilename} />
+          <WordDownloadButton filename={wordFilename} createBlob={() => createPurchaseOrderWord(po, company)} />
           <EmailShareButton to={po.vendorEmail} subject={`Purchase Order ${po.poNo}`} body={emailBody} />
           <WhatsAppShareButton phone={po.vendorPhone} message={`Purchase Order ${po.poNo} from ${company.legalName}.`} />
         </div>
@@ -64,7 +70,7 @@ export function PODetailView({ po, company, userRole }: { po: PurchaseOrderDetai
       <div className="overflow-x-auto"><POPrintView po={po} company={company} /></div>
       <div className="no-print flex flex-col gap-4">
         <Card className="border-slate-200 p-4"><p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Commercial Summary</p><div className="grid grid-cols-2 gap-3"><Info label="Grand Total" value={formatINR(po.grandTotal)} /><Info label="GST" value={po.gstType === "SGST_CGST" ? "CGST + SGST" : "IGST"} /><Info label="Advance" value={po.advancePercent ? `${po.advancePercent}%` : null} /><Info label="Credit Days" value={po.creditDays} /><Info label="Payment" value={po.paymentMethod} /><Info label="Site" value={po.site?.name} /></div></Card>
-        <Card className="border-slate-200 p-4"><p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">PDF Output</p><p className="break-all font-mono text-xs text-slate-700">{pdfFilename}</p><p className="mt-2 text-[11px] text-slate-400">A4 portrait layout is locked for Print / Save as PDF. Table header repeats automatically when a long PO flows to another page.</p></Card>
+        <Card className="border-slate-200 p-4"><p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Document Output</p><p className="break-all font-mono text-xs text-slate-700">{pdfFilename}</p><p className="mt-1 break-all font-mono text-xs text-slate-500">{wordFilename}</p><p className="mt-2 text-[11px] text-slate-400">Print / Save as PDF uses the approved A4 layout. Download Word creates an editable .docx copy when changes are needed outside the ERP.</p></Card>
         <Card className="border-slate-200 p-4"><POAttachmentsPanel poId={po.id} attachments={po.attachments as any} /></Card>
         <Card className="border-slate-200 p-4"><POCommentsPanel poId={po.id} comments={po.comments as any} /></Card>
         <Card className="border-slate-200 p-4"><p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">History</p><div className="space-y-1.5 text-xs text-slate-500"><p>Created by {po.createdBy.name} · {formatDate(po.createdAt)}</p><p>Last updated {formatDate(po.updatedAt)}</p></div></Card>
