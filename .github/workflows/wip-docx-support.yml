@@ -1,0 +1,33 @@
+name: WIP install DOCX support
+
+on:
+  push:
+    branches: [erp-document-upgrades]
+    paths:
+      - ".github/workflows/wip-docx-support.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  install:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: erp-document-upgrades
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+      - name: Install browser DOCX generator
+        run: npm install --save-exact docx@9.15.4
+      - name: Commit dependency lock
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json package-lock.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Add DOCX download support"
+          git push origin HEAD:erp-document-upgrades
