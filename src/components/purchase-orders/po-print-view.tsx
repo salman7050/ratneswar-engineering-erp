@@ -21,22 +21,21 @@ export function POPrintView({ po, company }: { po: PurchaseOrderDetail; company:
   const terms = lines(po.terms);
   const taxableLines = po.items.map((it) => ({ ...it, taxable: Math.round(it.quantity * it.rate * 100) / 100 }));
   const subject = po.projectName || (po.items[0]?.description ? `Purchase Order for ${po.items[0].description}` : "Purchase Order");
+  const contactName = po.deliveryContactPerson || company.poContactName || po.raisedBy || "—";
+  const contactEmail = company.poContactEmail || company.email;
+  const contactPhone = company.poContactPhone || company.phone;
 
   return (
     <div id="print-doc" className="ratneswar-po-wrap">
       <section className="ratneswar-po-page">
         <header className="rpo-letterhead">
-          <div className="rpo-brand">
-            {/* exact supplied Ratneswar wordmark */}
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/brand/ratneswar-wordmark.png" alt="Ratneswar Engineering" className="rpo-wordmark" />
-            <p>ELECTRICAL, MECHANICAL &amp; CIVIL CONTRACTOR</p>
+          <div className="rpo-letterhead-left">
+            <p className="rpo-gstin">GSTIN: {company.gstin}</p>
+            <p className="rpo-contractor-line">{company.tagline || "ELECTRICAL, MECHANICAL, CIVIL & SOLAR CONTRACTOR"}</p>
           </div>
-          <div className="rpo-company-contact">
-            <p>{company.address}</p>
-            <p>{company.phone}</p>
-            <p>{company.email}</p>
-            <p><b>GST No.:</b> {company.gstin}</p>
+          <div className="rpo-brand">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/brand/ratneswar-logo-full.png" alt="Ratneswar Engineering" className="rpo-wordmark" />
           </div>
         </header>
 
@@ -54,13 +53,15 @@ export function POPrintView({ po, company }: { po: PurchaseOrderDetail; company:
           <div className="rpo-meta-box">
             <div><b>P.O. No.</b><span>{po.poNo}</span></div>
             <div><b>P.O. Date</b><span>{formatDate(po.date)}</span></div>
-            <div><b>Contact Person</b><span>{company.poContactName || "Salman Perwez"}</span></div>
-            <div><b>Email ID</b><span>{company.poContactEmail || "ratneswar.salman@gmail.com"}</span></div>
-            <div><b>Mobile No.</b><span>{company.poContactPhone || "7050202473"}</span></div>
+            <div><b>Contact Person</b><span>{contactName}</span></div>
+            <div><b>Email ID</b><span>{contactEmail}</span></div>
+            <div><b>Mobile No.</b><span>{contactPhone}</span></div>
             <div><b>GST No.</b><span>{company.gstin}</span></div>
             {po.site?.name && <div><b>Project / Site</b><span>{po.site.name}</span></div>}
           </div>
         </div>
+
+        {po.vendorContactPerson && <div className="rpo-kind-attn">KIND ATTN.: {po.vendorContactPerson}</div>}
 
         <div className="rpo-reference-block">
           <p><b>Sub</b><span>:</span>{subject}</p>
@@ -68,7 +69,7 @@ export function POPrintView({ po, company }: { po: PurchaseOrderDetail; company:
           {po.refNumber && <p><b>Other Ref.</b><span>:</span>{po.refNumber}</p>}
         </div>
 
-        <p className="rpo-opening">Dear Sir/Madam,<br />With reference to the above requirement / offer, please find below our Purchase Order:</p>
+        <p className="rpo-opening">Dear Sir/Madam,<br />With reference to your offer and our discussion, we are pleased to place this Purchase Order. Kindly arrange supply strictly as per the specifications, quantities, rates and commercial terms mentioned below.</p>
 
         <table className="rpo-items">
           <thead><tr><th className="rpo-sl">Sr.<br />No.</th><th>Material / Service Description</th><th className="rpo-hsn">HSN / SAC</th><th className="rpo-qty">Qty</th><th className="rpo-uom">UOM</th><th className="rpo-rate">Unit Rate<br />(INR)</th><th className="rpo-amount">Amount<br />(INR)</th></tr></thead>
@@ -102,16 +103,17 @@ export function POPrintView({ po, company }: { po: PurchaseOrderDetail; company:
             </div>
             <div className="rpo-signature">
               <p>For RATNESWAR ENGINEERING</p>
-              {po.includeSignature && po.signaturePreviewUrl ? (
+              {po.includeSignature ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={po.signaturePreviewUrl} alt="Authorised signature and stamp" />
+                <img src="/brand/ratneswar-authorised-signature.png" alt="Authorised signature and stamp" />
               ) : <div className="rpo-signature-space" />}
-              <div>Authorized Signatory</div>
+              <div>Authorised Signatory</div>
             </div>
           </div>
         </div>
 
-        <footer className="rpo-footer">Ratneswar Engineering · {company.address} · {company.email}</footer>
+        <div className="rpo-po-note">Please mention the above P.O. Number on your Tax Invoice, Delivery Challan and all correspondence related to this order.</div>
+        <footer className="rpo-footer"><b>{company.legalName}</b><span>{company.address}</span><span>{company.email}</span></footer>
       </section>
     </div>
   );
