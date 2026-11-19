@@ -11,6 +11,8 @@ const PUBLIC_PATHS = [
   "/manifest.json",
   "/sw.js",
   "/design-system",
+  "/expense/",
+  "/api/expense-link/",
 ];
 
 export async function middleware(request: NextRequest) {
