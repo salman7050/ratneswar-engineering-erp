@@ -41,6 +41,9 @@ model User {
   approvedTenders  Tender[]      @relation("TenderApprover")
   uploadedDocs     Document[]    @relation("DocumentUploader")
   loggedExpenses   Expense[]     @relation("ExpenseLogger")
+  createdExpenseMembers ExpenseMember[] @relation("ExpenseMemberCreator")
+  reviewedExpenseSubmissions ExpenseSubmission[] @relation("ExpenseSubmissionReviewer")
+  createdMemberPassbookEntries MemberPassbookEntry[] @relation("MemberPassbookCreator")
   createdInvoices  Invoice[]     @relation("InvoiceCreator")
   createdQuotations Quotation[]  @relation("QuotationCreator")
   approvedQuotations Quotation[] @relation("QuotationApprover")
@@ -148,6 +151,8 @@ model Site {
   tenders     Tender[]
   documents   Document[]
   expenses    Expense[]
+  expenseSubmissionItems ExpenseSubmissionItem[]
+  memberPassbookEntries MemberPassbookEntry[]
   invoices    Invoice[]
   employees   Employee[]
   quotations  Quotation[]
@@ -674,9 +679,13 @@ model Document {
 enum ExpenseCategory {
   MATERIAL
   LABOUR
+  FOOD
   FUEL
   TRANSPORT
+  SITE_TRANSPORT
   EQUIPMENT
+  OFFICE
+  MARKETING
   MISC
 }
 
@@ -730,11 +739,125 @@ model Expense {
   createdById String
   createdBy   User   @relation("ExpenseLogger", fields: [createdById], references: [id])
 
+  submissionItem ExpenseSubmissionItem?
+  memberPassbookEntry MemberPassbookEntry?
+
   @@index([date])
   @@index([businessUnit])
   @@index([siteId])
   @@index([transactionType])
   @@map("expenses")
+}
+
+// ── Employee Expense Portal & Member Passbook ────────────────
+
+enum ExpenseSubmissionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum MemberPassbookEntryType {
+  ADVANCE
+  EXPENSE
+  REFUND
+  ADJUSTMENT
+}
+
+model ExpenseMember {
+  id           String   @id @default(cuid())
+  name         String
+  phone        String?
+  roleLabel    String
+  businessUnit String   @default("Ratneswar Engineering")
+  area         String?
+  token        String   @unique
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  createdById String
+  createdBy   User @relation("ExpenseMemberCreator", fields: [createdById], references: [id])
+
+  submissions    ExpenseSubmission[]
+  passbookEntries MemberPassbookEntry[]
+
+  @@index([isActive])
+  @@map("expense_members")
+}
+
+model ExpenseSubmission {
+  id          String                  @id @default(cuid())
+  status      ExpenseSubmissionStatus @default(PENDING)
+  note        String?
+  submittedAt DateTime                @default(now())
+  reviewedAt  DateTime?
+
+  memberId String
+  member   ExpenseMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  reviewedById String?
+  reviewedBy   User? @relation("ExpenseSubmissionReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+
+  items ExpenseSubmissionItem[]
+
+  @@index([status, submittedAt])
+  @@index([memberId, submittedAt])
+  @@map("expense_submissions")
+}
+
+model ExpenseSubmissionItem {
+  id                     String          @id @default(cuid())
+  date                   DateTime
+  category               ExpenseCategory
+  siteName               String?
+  description            String
+  amount                 Decimal         @db.Decimal(14, 2)
+  paymentMode            String
+  reference              String?
+  receiptUrl             String?
+  reimbursementRequested Boolean         @default(false)
+  createdAt              DateTime        @default(now())
+
+  submissionId String
+  submission   ExpenseSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  siteId String?
+  site   Site? @relation(fields: [siteId], references: [id], onDelete: SetNull)
+
+  expenseId String?  @unique
+  expense   Expense? @relation(fields: [expenseId], references: [id], onDelete: SetNull)
+
+  @@index([submissionId])
+  @@index([siteId])
+  @@map("expense_submission_items")
+}
+
+model MemberPassbookEntry {
+  id          String                  @id @default(cuid())
+  type        MemberPassbookEntryType
+  date        DateTime
+  description String
+  amount      Decimal                 @db.Decimal(14, 2)
+  reference   String?
+  proofUrl    String?
+  createdAt   DateTime                @default(now())
+
+  memberId String
+  member   ExpenseMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  siteId String?
+  site   Site? @relation(fields: [siteId], references: [id], onDelete: SetNull)
+
+  sourceExpenseId String?  @unique
+  sourceExpense   Expense? @relation(fields: [sourceExpenseId], references: [id], onDelete: SetNull)
+
+  createdById String
+  createdBy   User @relation("MemberPassbookCreator", fields: [createdById], references: [id])
+
+  @@index([memberId, date])
+  @@index([type, date])
+  @@map("member_passbook_entries")
 }
 
 // ── HR / Salary ───────────────────────────────────────────────
