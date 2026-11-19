@@ -1,8 +1,10 @@
 import { ExpensesClient } from "@/components/expenses/expenses-client";
+import { ExpensePortalAdmin } from "@/components/expenses/expense-portal-admin";
 import { Eyebrow, H1, Muted } from "@/components/ui/typography";
 import { requirePermission } from "@/lib/auth";
 import { can } from "@/lib/rbac";
 import { getExpenses, getExpenseSites, getExpenseVendors, getExpensePurchaseOrders, getSalaryCostEntries } from "@/lib/queries/expenses";
+import { getExpensePortalAdminData } from "@/lib/queries/expense-portal";
 
 export const metadata = { title: "Expenses & Payments · Ratneswar ERP" };
 export const dynamic = "force-dynamic";
@@ -29,12 +31,13 @@ export default async function ExpensesPage({ searchParams }: { searchParams?: Pr
   const toInput = safeDate(filters?.to, defaultTo);
   const to = new Date(toInput.getFullYear(), toInput.getMonth(), toInput.getDate(), 23, 59, 59, 999);
 
-  const [expenses, salaryCosts, sites, vendors, purchaseOrders] = await Promise.all([
+  const [expenses, salaryCosts, sites, vendors, purchaseOrders, expensePortal] = await Promise.all([
     getExpenses({ from, to }),
     getSalaryCostEntries({ from, to }),
     getExpenseSites(),
     getExpenseVendors(),
     getExpensePurchaseOrders(),
+    getExpensePortalAdminData(),
   ]);
 
   return (
@@ -55,6 +58,7 @@ export default async function ExpensesPage({ searchParams }: { searchParams?: Pr
         fromDate={isoDate(from)}
         toDate={isoDate(toInput)}
       />
+      <ExpensePortalAdmin data={expensePortal} />
     </div>
   );
 }
